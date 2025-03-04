@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	aggkitcommon "github.com/agglayer/go_signer/common"
+	signercommon "github.com/agglayer/go_signer/common"
 	web3signerclient "github.com/agglayer/go_signer/signer/web3signer_client"
 	"github.com/ethereum/go-ethereum/common"
 )
@@ -59,12 +59,12 @@ func NewWeb3SignerConfig(cfg SignerConfig) (Web3SignerConfig, error) {
 
 type Web3SignerSign struct {
 	name    string
-	logger  aggkitcommon.Logger
+	logger  signercommon.Logger
 	client  Web3SignerClienter
 	address common.Address
 }
 
-func NewWeb3SignerSign(name string, logger aggkitcommon.Logger, client Web3SignerClienter,
+func NewWeb3SignerSign(name string, logger signercommon.Logger, client Web3SignerClienter,
 	address common.Address) *Web3SignerSign {
 	return &Web3SignerSign{
 		name:    name,
@@ -74,7 +74,7 @@ func NewWeb3SignerSign(name string, logger aggkitcommon.Logger, client Web3Signe
 	}
 }
 
-func NewWeb3SignerSignFromConfig(name string, logger aggkitcommon.Logger, cfg Web3SignerConfig) *Web3SignerSign {
+func NewWeb3SignerSignFromConfig(name string, logger signercommon.Logger, cfg Web3SignerConfig) *Web3SignerSign {
 	client := web3signerclient.NewWeb3SignerClient(cfg.URL)
 	return NewWeb3SignerSign(name, logger, client, cfg.Address)
 }

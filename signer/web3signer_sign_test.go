@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
-	"github.com/agglayer/aggkit/log"
-	"github.com/agglayer/aggkit/signer/mocks"
+	"github.com/agglayer/go_signer/log"
+	"github.com/agglayer/go_signer/signer/mocks"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"

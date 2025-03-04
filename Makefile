@@ -10,7 +10,7 @@ endif
 GOBASE := $(shell pwd)
 GOBIN := $(GOBASE)/target
 GOENVVARS := GOBIN=$(GOBIN) CGO_ENABLED=1 GOARCH=$(ARCH)
-GOBINARY := aggkit
+GOBINARY := signer
 GOCMD := $(GOBASE)/cmd
 
 
@@ -25,8 +25,8 @@ check-go:
 build: check-go
 lint: check-go
 
-.PHONY: build-aggkit
-build-aggkit:
+.PHONY: build-signer
+build-signer:
 	$(GOENVVARS) go build -ldflags "all=$(LDFLAGS)" -o $(GOBIN)/$(GOBINARY) $(GOCMD)
 	
 .PHONY: test-unit
@@ -43,7 +43,7 @@ COMMON_MOCKERY_PARAMS=--disable-version-string --with-expecter --exported
 .PHONY: generate-mocks
 generate-mocks:	
 	mockery ${COMMON_MOCKERY_PARAMS}
-	
+
 ## Help display.
 ## Pulls comments from beside commands and prints a nicely formatted
 ## display with the commands and their usage information.

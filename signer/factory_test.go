@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/agglayer/aggkit/log"
+	"github.com/agglayer/go_signer/log"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/require"
 )
@@ -17,7 +17,7 @@ func TestSignerExploratory(t *testing.T) {
 	localConfig := SignerConfig{
 		Method: MethodLocal,
 		Config: map[string]interface{}{
-			FieldPath:     "../tmp/aggkit/local_config/sequencer.keystore",
+			FieldPath:     "../tmp/local_config/sequencer.keystore",
 			FieldPassword: "pSnv6Dh5s9ahuzGzH9RoCDrKAMddaX3m",
 		},
 	}
