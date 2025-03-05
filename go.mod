@@ -1,12 +1,10 @@
 module github.com/agglayer/go_signer
 
-go 1.23.0
-
-toolchain go1.23.6
+go 1.22.4
 
 require (
-	github.com/0xPolygon/cdk-rpc v0.0.0-20250213125803-179882ad6229
-	github.com/ethereum/go-ethereum v1.15.4
+	github.com/0xPolygon/cdk-rpc v0.0.0-20241004114257-6c3cb6eebfb6
+	github.com/ethereum/go-ethereum v1.14.10
 	github.com/hermeznetwork/tracerr v0.3.2
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/spf13/viper v1.19.0
@@ -16,6 +14,7 @@ require (
 
 require (
 	github.com/bits-and-blooms/bitset v1.17.0 // indirect
+	github.com/btcsuite/btcd/btcec/v2 v2.3.4 // indirect
 	github.com/consensys/bavard v0.1.22 // indirect
 	github.com/consensys/gnark-crypto v0.14.0 // indirect
 	github.com/crate-crypto/go-ipa v0.0.0-20240724233137-53bbb0ceb27a // indirect
@@ -52,7 +51,7 @@ require (
 	github.com/supranational/blst v0.3.14 // indirect
 	go.uber.org/multierr v1.10.0 // indirect
 	golang.org/x/crypto v0.32.0 // indirect
-	golang.org/x/exp v0.0.0-20230905200255-921286631fa9 // indirect
+	golang.org/x/exp v0.0.0-20231110203233-9a3e6036ecaa // indirect
 	golang.org/x/net v0.34.0 // indirect
 	golang.org/x/sync v0.10.0 // indirect
 	golang.org/x/sys v0.29.0 // indirect
