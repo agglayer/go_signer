@@ -1,0 +1,26 @@
+name: Lint
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - update-external-dependencies
+      - 'release/**'
+  pull_request:
+jobs:
+  lint:
+    runs-on: amd-runner-2204
+    steps:
+      - name: Install Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: 1.22.x
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6.5.0
+        with:
+          version: v1.64.5
+          args: --timeout=30m
