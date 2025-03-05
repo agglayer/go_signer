@@ -1,10 +1,11 @@
 module github.com/agglayer/go_signer
 
 go 1.22.12
+toolchain go1.23.7
 
 require (
 	github.com/0xPolygon/cdk-rpc v0.0.0-20241004114257-6c3cb6eebfb6
-	github.com/ethereum/go-ethereum v1.14.13
+	github.com/ethereum/go-ethereum v1.15.5
 	github.com/hermeznetwork/tracerr v0.3.2
 	github.com/mitchellh/mapstructure v1.5.0
 	github.com/spf13/viper v1.19.0
