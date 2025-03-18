@@ -90,7 +90,8 @@ func (e *Web3SignerSign) Initialize(ctx context.Context) error {
 	if e.address == zeroAddr {
 		accounts, err := e.client.EthAccounts(ctx)
 		if err != nil {
-			return err
+			return fmt.Errorf("%s error getting ethAccounts to define default public Address. Err:%w",
+				e.logPrefix(), err)
 		}
 		if len(accounts) == 0 {
 			return fmt.Errorf("%s no accounts found", e.logPrefix())

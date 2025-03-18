@@ -7,6 +7,7 @@ import (
 
 	"github.com/0xPolygon/cdk-rpc/rpc"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 )
 
 type Web3SignerClient struct {
@@ -56,4 +57,18 @@ func (e *Web3SignerClient) SignHash(ctx context.Context,
 	}
 	result := common.FromHex(resultStr)
 	return result, nil
+}
+
+func (e *Web3SignerClient) SignTx(common.Address, *types.Transaction) {
+	params := []interface{}{address, hashToSign}
+	params := struct{
+		From common.Address
+		To common.Address
+		
+	}
+	response, err := rpc.JSONRPCCallWithContext(ctx, e.url, "eth_signTransaction", params...)
+	if err != nil {
+		return nil, err
+	}
+
 }

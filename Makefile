@@ -10,8 +10,6 @@ endif
 GOBASE := $(shell pwd)
 GOBIN := $(GOBASE)/target
 GOENVVARS := GOBIN=$(GOBIN) CGO_ENABLED=1 GOARCH=$(ARCH)
-GOBINARY := signer
-GOCMD := $(GOBASE)/cmd
 
 
 # Check dependencies
@@ -25,14 +23,24 @@ check-go:
 build: check-go
 lint: check-go
 
-.PHONY: build-signer
-build-signer:
-	$(GOENVVARS) go build -ldflags "all=$(LDFLAGS)" -o $(GOBIN)/$(GOBINARY) $(GOCMD)
+.PHONY: clean
+clean:
+	rm -rf $(GOBIN)/*
+
+
+.PHONY: build
+build:
+	$(GOENVVARS) go build -ldflags "all=$(LDFLAGS)" -o $(GOBIN)/cmdline_signer test/cmdline_signer/main.go
 	
 .PHONY: test-unit
 test-unit:
 	trap '$(STOP)' EXIT; MallocNanoZone=0 go test -count=1 -short -race -p 1 -covermode=atomic -coverprofile=coverage.out  -coverpkg ./... -timeout 15m ./...
+
+.PHONY: test-e2e
+test-e2e:
+	trap '$(STOP)' EXIT; MallocNanoZone=0 go test -count=1 -race -p 1 -covermode=atomic -coverprofile=coverage.out  -coverpkg ./... -timeout 15m ./...
 	
+
 .PHONY: lint
 lint: ## Runs the linter
 	export "GOROOT=$$(go env GOROOT)" && $$(go env GOPATH)/bin/golangci-lint run --timeout 5m

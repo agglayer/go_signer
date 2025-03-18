@@ -1,0 +1,47 @@
+services:
+  go_signer-e2e-geth:
+    container_name: go_signer-e2e-geth
+    image: hermeznetwork/geth-zkevm-contracts:elderberry-fork.9-geth1.13.11
+    environment:
+      - DEV_PERIOD
+    ports:
+      - "8545:8545"
+    entrypoint:
+      - geth
+      - --http
+      - --http.addr
+      - "0.0.0.0"
+      - "--http.corsdomain"
+      - "*"
+      - "--http.vhosts"
+      - "*"
+      - --dev
+      - --dev.period
+      - "1"
+      - "--datadir"
+      - "/geth_data"
+      - "--http.api"
+      - "admin,eth,debug,miner,net,txpool,personal,web3"
+
+  go_signer-e2e-web3signer:
+    container_name: go_signer-e2e-web3signer
+    image: consensys/web3signer:25.2
+    ports: 
+      - "9999:9000"
+    volumes:
+      - ./key_store/:/data/keys
+    healthcheck:
+      test: curl -X GET http://localhost:9000/upcheck
+      interval: 1s
+      timeout: 10s
+      retries: 20
+    entrypoint:
+      - /opt/web3signer/bin/web3signer
+      - "--key-store-path"
+      - "/data/keys"
+      - --http-listen-port
+      - "9000"
+      - eth1
+      - --chain-id
+      - "1337"
+      
