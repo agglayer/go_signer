@@ -13,9 +13,15 @@ import (
 	"github.com/ethereum/go-ethereum/common"
 )
 
-const shutdownDockerAfterTest = false
+// shutdownDockerAfterTest:  set to false if you want to inspect the container
+// after running the test
+const shutdownDockerAfterTest = true
+
+// dockerIsAlreadyRunning: set to true if you want to start manually the containers
+// or you want to take advantage of previous run
 const dockerIsAlreadyRunning = false
 
+// TestWeb3Signer tests the web3signer signer
 func TestWeb3Signer(t *testing.T) {
 	if testing.Short() {
 		t.Skip()
