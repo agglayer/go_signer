@@ -34,7 +34,7 @@ build:
 	
 .PHONY: test-unit
 test-unit:
-	trap '$(STOP)' EXIT; MallocNanoZone=0 go test -count=1 -short -race -p 1 -covermode=atomic -coverprofile=coverage.out  -coverpkg ./... -timeout 15m ./...
+	trap '$(STOP)' EXIT; MallocNanoZone=0 go test -count=1 -short -race -p 1 -covermode=atomic -coverprofile=coverage_short.out  -coverpkg ./... -timeout 15m ./...
 
 .PHONY: test-e2e
 test-e2e:
