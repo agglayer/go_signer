@@ -1,0 +1,4 @@
+type: "file-keystore"
+keyType: "SECP256K1"
+keystoreFile: "0197d026-f6ae-4a8a-906a-f932fe641aa0"
+keystorePasswordFile: "0197d026-f6ae-4a8a-906a-f932fe641aa0.password"

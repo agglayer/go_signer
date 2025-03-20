@@ -22,7 +22,7 @@ var (
 	ErrUnknownSignerMethod = fmt.Errorf("unknown signer method")
 )
 
-func NewSigner(name string, logger signercommon.Logger, ctx context.Context, cfg SignerConfig) (Signer, error) {
+func NewSigner(ctx context.Context, chainID uint64, cfg SignerConfig, name string, logger signercommon.Logger) (Signer, error) {
 	var res Signer
 	if cfg.Method == "" {
 		logger.Warnf("No signer method specified, defaulting to local (keystore file)")
@@ -34,7 +34,7 @@ func NewSigner(name string, logger signercommon.Logger, ctx context.Context, cfg
 		if err != nil {
 			return nil, err
 		}
-		res = NewLocalSign(name, logger, specificCfg)
+		res = NewLocalSign(name, logger, specificCfg, chainID)
 	case MethodWeb3Signer:
 		specificCfg, err := NewWeb3SignerConfig(cfg)
 		if err != nil {

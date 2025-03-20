@@ -4,15 +4,19 @@ import (
 	"context"
 	"crypto/ecdsa"
 	"fmt"
+	"math/big"
 
 	signercommon "github.com/agglayer/go_signer/common"
+	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/crypto"
 )
 
 const (
 	FieldPath     = "path"
 	FieldPassword = "password"
+	enableEIP155  = true
 )
 
 // LocalSign is a signer that uses a local keystore file
@@ -22,6 +26,9 @@ type LocalSign struct {
 	file          signercommon.KeystoreFileConfig
 	privateKey    *ecdsa.PrivateKey
 	publicAddress common.Address
+
+	chainID uint64
+	auth    *bind.TransactOpts
 }
 
 // NewLocalSignerConfig creates a generic config  (SignerConfig)
@@ -59,11 +66,16 @@ func NewLocalConfig(cfg SignerConfig) (signercommon.KeystoreFileConfig, error) {
 }
 
 // NewLocalSign creates a new LocalSign based on config
-func NewLocalSign(name string, logger signercommon.Logger, file signercommon.KeystoreFileConfig) *LocalSign {
+// name is the name of the signer
+// logger is the logger to use
+// file is the keystore file config
+// chainID is the chainID to use (required to sync tx)
+func NewLocalSign(name string, logger signercommon.Logger, file signercommon.KeystoreFileConfig, chainID uint64) *LocalSign {
 	return &LocalSign{
-		name:   name,
-		logger: logger,
-		file:   file,
+		name:    name,
+		logger:  logger,
+		file:    file,
+		chainID: chainID,
 	}
 }
 
@@ -81,20 +93,47 @@ func NewLocalSignFromPrivateKey(name string,
 
 // Initialize initializes the LocalSign, read key if needed
 func (e *LocalSign) Initialize(ctx context.Context) error {
+	if err := e.initializeKey(); err != nil {
+		return fmt.Errorf("%s failed to initialize key: %w", e.logPrefix(), err)
+	}
+	if err := e.initializeAuth(); err != nil {
+		return fmt.Errorf("%s failed to initialize auth: %w", e.logPrefix(), err)
+	}
+	return nil
+}
+
+func (e *LocalSign) initializeKey() error {
 	// Check if it's already initialized
 	if e.privateKey != nil {
 		return nil
 	}
 	privateKey, err := signercommon.NewKeyFromKeystore(e.file)
 	if err != nil {
-		return err
+		return fmt.Errorf("%s initializeKey fails. Err: %w", e.logPrefix(), err)
 	}
 	if privateKey == nil {
 		// If the private key is nil, the address is also nil
+		// we allow to have a nil private key, it will fail if try to use it
+		e.logger.Warnf("%s private key is nil", e.logPrefix())
 		return nil
 	}
 	e.privateKey = privateKey
 	e.publicAddress = crypto.PubkeyToAddress(privateKey.PublicKey)
+	return nil
+}
+
+func (e *LocalSign) initializeAuth() error {
+	if e.auth != nil {
+		return nil
+	}
+	if e.privateKey == nil {
+		return nil
+	}
+	auth, err := bind.NewKeyedTransactorWithChainID(e.privateKey, new(big.Int).SetUint64(e.chainID))
+	if err != nil {
+		return fmt.Errorf("%s can't initialize auth. Err: %w", e.logPrefix(), err)
+	}
+	e.auth = auth
 	return nil
 }
 
@@ -103,7 +142,16 @@ func (e *LocalSign) SignHash(ctx context.Context, hash common.Hash) ([]byte, err
 	if e.privateKey == nil {
 		return nil, fmt.Errorf("%s private key is nil", e.logPrefix())
 	}
-	return crypto.Sign(hash.Bytes(), e.privateKey)
+	// length of the hash is 32 bytes, so it's hardcoded
+	hashWithPrefix := crypto.Keccak256(append([]byte("\x19Ethereum Signed Message:\n32"), hash.Bytes()...))
+	sig, err := crypto.Sign(hashWithPrefix, e.privateKey)
+	if err != nil {
+		return nil, fmt.Errorf("%s can't sign hash. Err: %w", e.logPrefix(), err)
+	}
+	// Set r(recoveryID) as eth_sign that is 27 or 28
+	// crypto.Sign returns  0 or 1
+	sig[64] = sig[64] + 27
+	return sig, err
 }
 
 func (e *LocalSign) PublicAddress() common.Address {
@@ -111,9 +159,21 @@ func (e *LocalSign) PublicAddress() common.Address {
 }
 
 func (e *LocalSign) String() string {
-	return fmt.Sprintf("signer: %s path:%s, pubAddr: %s", e.logPrefix(), e.file, e.publicAddress.String())
+	return fmt.Sprintf("%s path:%s, pubAddr: %s", e.logPrefix(), e.file, e.publicAddress.String())
 }
 
 func (e *LocalSign) logPrefix() string {
-	return fmt.Sprintf("signer:%s[%s]: ", MethodLocal, e.name)
+	return fmt.Sprintf("signer: %s[%s]: ", MethodLocal, e.name)
+}
+
+func (e *LocalSign) SignTx(ctx context.Context, tx *types.Transaction) (*types.Transaction, error) {
+	if e.auth == nil {
+		return nil, fmt.Errorf("%s can't signTx because auth is nil", e.logPrefix())
+	}
+
+	signedTx, err := e.auth.Signer(e.publicAddress, tx)
+	if err != nil {
+		return nil, fmt.Errorf("%s can't signTx because auth.Signer returns error %w", e.logPrefix(), err)
+	}
+	return signedTx, nil
 }
