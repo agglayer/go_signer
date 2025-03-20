@@ -2,23 +2,24 @@ package e2e
 
 import (
 	"context"
+	"os"
+	"strings"
 	"testing"
 	"time"
 
 	"github.com/agglayer/go_signer/log"
 	"github.com/agglayer/go_signer/signer"
 	"github.com/agglayer/go_signer/test/e2e/helpers"
-
-	"github.com/stretchr/testify/require"
-
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/ethclient"
+	"github.com/stretchr/testify/require"
 )
 
-// TestWeb3Signer tests the web3signer signer
-func TestWeb3Signer(t *testing.T) {
+func TestLocalSigner(t *testing.T) {
 	if testing.Short() {
 		t.Skip()
 	}
+
 	if !dockerIsAlreadyRunning {
 		dockerCompose := helpers.NewDockerCompose()
 		dockerCompose.Down(t)
@@ -31,11 +32,21 @@ func TestWeb3Signer(t *testing.T) {
 		dockerCompose.WaitHealthy(t, 40*time.Second)
 	}
 	ctx := context.TODO()
-	sign, err := signer.NewSigner(ctx, defaultChainID, signer.SignerConfig{
-		Method: signer.MethodWeb3Signer,
+	ethClient, err := ethclient.Dial(gethURL)
+	require.NoError(t, err)
+	defer ethClient.Close()
+	chainID, err := ethClient.ChainID(ctx)
+	require.NoError(t, err)
+	log.Info("chainID: ", chainID.Uint64())
+
+	password, err := os.ReadFile("key_store/funded_addr.password")
+	require.NoError(t, err)
+	trimmedPassword := strings.TrimSpace(string(password))
+	sign, err := signer.NewSigner(ctx, chainID.Uint64(), signer.SignerConfig{
+		Method: signer.MethodLocal,
 		Config: map[string]interface{}{
-			signer.FieldURL:     "http://localhost:9999",
-			signer.FieldAddress: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+			signer.FieldPath:     "key_store/funded_addr",
+			signer.FieldPassword: trimmedPassword,
 		},
 	}, "test", log.WithFields("module", "test"))
 	require.NoError(t, err)
@@ -53,5 +64,4 @@ func TestWeb3Signer(t *testing.T) {
 		common.Bytes2Hex(signed))
 
 	testSendEthTx(t, sign.PublicAddress(), sign)
-
 }

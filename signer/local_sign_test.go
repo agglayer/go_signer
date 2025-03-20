@@ -42,7 +42,7 @@ func TestNewLocalSignerConfigWrongData(t *testing.T) {
 }
 
 func TestNewLocalSign(t *testing.T) {
-	sut := NewLocalSign("name", nil, signercommon.KeystoreFileConfig{})
+	sut := NewLocalSign("name", nil, signercommon.KeystoreFileConfig{}, 0)
 	require.NotNil(t, sut)
 	require.Equal(t, "name", sut.name)
 	require.Nil(t, sut.logger)
@@ -66,7 +66,7 @@ func TestNewLocalSignFromPrivateKey(t *testing.T) {
 
 func TestNewLocalSignEmpty(t *testing.T) {
 	logger := log.WithFields("test", "test")
-	sut := NewLocalSign("name", logger, signercommon.KeystoreFileConfig{})
+	sut := NewLocalSign("name", logger, signercommon.KeystoreFileConfig{}, 0)
 	err := sut.Initialize(context.Background())
 	require.NoError(t, err)
 	pubAddr := sut.PublicAddress()

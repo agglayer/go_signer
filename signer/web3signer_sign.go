@@ -7,6 +7,7 @@ import (
 	signercommon "github.com/agglayer/go_signer/common"
 	web3signerclient "github.com/agglayer/go_signer/signer/web3signer_client"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/core/types"
 )
 
 const (
@@ -17,6 +18,7 @@ const (
 type Web3SignerClienter interface {
 	EthAccounts(ctx context.Context) ([]common.Address, error)
 	SignHash(ctx context.Context, address common.Address, hashToSign common.Hash) ([]byte, error)
+	SignTx(ctx context.Context, from common.Address, tx *types.Transaction) (*types.Transaction, error)
 }
 
 type Web3SignerConfig struct {
@@ -117,6 +119,11 @@ func (e *Web3SignerSign) SignHash(ctx context.Context, hash common.Hash) ([]byte
 	}
 
 	return e.client.SignHash(ctx, e.address, hash)
+}
+
+func (e *Web3SignerSign) SignTx(ctx context.Context, tx *types.Transaction) (*types.Transaction, error) {
+	return e.client.SignTx(ctx, e.address, tx)
+	//return nil, fmt.Errorf("not implemented")
 }
 
 func (e *Web3SignerSign) PublicAddress() common.Address {

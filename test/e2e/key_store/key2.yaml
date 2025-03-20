@@ -1,0 +1,4 @@
+type: "file-keystore"
+keyType: "SECP256K1"
+keystoreFile: "funded_addr"
+keystorePasswordFile: "funded_addr.password"

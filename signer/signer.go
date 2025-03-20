@@ -27,5 +27,5 @@ type HashSigner interface {
 
 type TxSigner interface {
 	// SignTx signs the hash using the private key
-	SignTx(common.Address, *types.Transaction) (*types.Transaction, error)
+	SignTx(ctx context.Context, tx *types.Transaction) (*types.Transaction, error)
 }

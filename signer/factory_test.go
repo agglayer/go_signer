@@ -22,7 +22,7 @@ func TestSignerExploratory(t *testing.T) {
 		},
 	}
 
-	local, err := NewSigner("test-local", logger, ctx, localConfig)
+	local, err := NewSigner(ctx, 0, localConfig, "test-local", logger)
 	require.NoError(t, err)
 	require.NotNil(t, local)
 	require.NoError(t, local.Initialize(ctx))
@@ -39,7 +39,7 @@ func TestSignerExploratory(t *testing.T) {
 			FieldURL: "http://localhost:9000",
 		},
 	}
-	web3signer, err := NewSigner("test-w3s", logger, ctx, w3sConfig)
+	web3signer, err := NewSigner(ctx, 0, w3sConfig, "test-w3s", logger)
 	require.NoError(t, err)
 	require.NotNil(t, web3signer)
 	require.NoError(t, web3signer.Initialize(ctx))
@@ -55,93 +55,93 @@ func TestNewSigner(t *testing.T) {
 	logger := log.WithFields("test", "test")
 	ctx := context.TODO()
 	t.Run("unknown signer method", func(t *testing.T) {
-		sut, err := NewSigner("test", logger, ctx, SignerConfig{Method: "unknown_method"})
+		sut, err := NewSigner(ctx, 1, SignerConfig{Method: "unknown_method"}, "test", logger)
 		require.Error(t, err)
 		require.Nil(t, sut)
 	})
 	t.Run("empty method is local", func(t *testing.T) {
-		sut, err := NewSigner("test", logger, ctx, SignerConfig{})
+		sut, err := NewSigner(ctx, 1, SignerConfig{}, "test", logger)
 		require.NoError(t, err)
 		require.NotNil(t, sut)
 		require.Contains(t, sut.String(), MethodLocal)
 	})
 
 	t.Run("wrong local config", func(t *testing.T) {
-		sut, err := NewSigner("test", logger, ctx, SignerConfig{
+		sut, err := NewSigner(ctx, 1, SignerConfig{
 			Config: map[string]interface{}{
 				FieldPath: 1234,
 			},
-		})
+		}, "test-local", logger)
 		require.Error(t, err)
 		require.Nil(t, sut)
 	})
 
 	t.Run("wrong local config", func(t *testing.T) {
-		sut, err := NewSigner("test", logger, ctx, SignerConfig{
+		sut, err := NewSigner(ctx, 1, SignerConfig{
 			Config: map[string]interface{}{
 				FieldPath: 1234,
 			},
-		})
+		}, "test-local", logger)
 		require.Error(t, err)
 		require.Nil(t, sut)
 	})
 
 	t.Run("wrong web3signer config", func(t *testing.T) {
-		sut, err := NewSigner("test", logger, ctx, SignerConfig{
+		sut, err := NewSigner(ctx, 1, SignerConfig{
 			Method: MethodWeb3Signer,
 			Config: map[string]interface{}{
 				FieldAddress: 1234,
 			},
-		})
+		}, "test-local", logger)
 		require.Error(t, err)
 		require.Nil(t, sut)
 	})
 
 	t.Run("wrong web3signer config2", func(t *testing.T) {
-		sut, err := NewSigner("test", logger, ctx, SignerConfig{
+		sut, err := NewSigner(ctx, 1, SignerConfig{
 			Method: MethodWeb3Signer,
 			Config: map[string]interface{}{
 				FieldAddress: "NOTHEXA",
 			},
-		})
+		}, "test-local", logger)
 		require.Error(t, err)
 		require.Contains(t, err.Error(), FieldAddress)
 		require.Nil(t, sut)
 	})
 
 	t.Run("wrong web3signer config3", func(t *testing.T) {
-		sut, err := NewSigner("test", logger, ctx, SignerConfig{
+		sut, err := NewSigner(ctx, 1, SignerConfig{
 			Method: MethodWeb3Signer,
 			Config: map[string]interface{}{
 				FieldAddress: "0x71C7656EC7ab88b098defB751B7401B5f6d8976F",
 				FieldURL:     1234,
 			},
-		})
+		}, "test-local", logger)
 		require.Error(t, err)
 		require.Contains(t, err.Error(), FieldURL)
 		require.Nil(t, sut)
 	})
 
 	t.Run("wrong web3signer missing URL", func(t *testing.T) {
-		sut, err := NewSigner("test", logger, ctx, SignerConfig{
+		sut, err := NewSigner(ctx, 1, SignerConfig{
 			Method: MethodWeb3Signer,
 			Config: map[string]interface{}{
 				FieldAddress: "0x71C7656EC7ab88b098defB751B7401B5f6d8976F",
 			},
-		})
+		}, "test-local", logger)
 		require.Error(t, err)
 		require.Contains(t, err.Error(), FieldURL)
 		require.Nil(t, sut)
 	})
 
 	t.Run("web3signer config", func(t *testing.T) {
-		sut, err := NewSigner("test", logger, ctx, SignerConfig{
+		sut, err := NewSigner(ctx, 1, SignerConfig{
 			Method: MethodWeb3Signer,
 			Config: map[string]interface{}{
 				FieldAddress: "0x71C7656EC7ab88b098defB751B7401B5f6d8976F",
 				FieldURL:     "http://localhost:9001",
 			},
-		})
+		}, "test-local", logger)
 		require.NoError(t, err)
 		require.NotNil(t, sut)
 	})
