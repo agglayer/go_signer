@@ -4,7 +4,7 @@ Library for support multiples method to sign
 ## Configuration
 This library support 2 types of signing methods: 
 - **local**: it's a private key file
-- **web3signer**: it's a call to a [web_3signer](https://docs.web3signer.consensys.io/) service 
+- **remote**: it's a call to a remote signer service that implements [remote signing APIs](https://github.com/ethereum/remote-signing-api?tab=readme-ov-file) as [web_3signer](https://docs.web3signer.consensys.io/) 
 
 ### Configuration local method
 #### Generic configuration
@@ -17,16 +17,16 @@ Password = "password"
 #### Specific configuration struct
 `signercommon.KeystoreFileConfig`
 
-### Configuration web3signer method
+### Configuration remote method
 #### Generic configuration
 The object `SignerConfig` need next params:
-- `SignerConfig.Method` : `web3signer`
+- `SignerConfig.Method` : `remote`
 - `SignerConfig.Config["URL"]`: URL to web3_signer service
   `SignerConfig.Config["Address"]`: Public address to use if there are more than 1 in web3_signer service. If there are only 1 it can be empty and the first one will be used.
 
 - Example of config file:
 ```
-Method = "web3signer"
+Method = "remote"
 URL = "http://localhost:9000"
 Address = "0xe34243804e1f7257acb09c97d0d6f023663200c39ee85a1e6927b0b391710bbb"
 ```

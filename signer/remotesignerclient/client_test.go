@@ -1,4 +1,4 @@
-package web3signerclient
+package remotesignerclient
 
 import (
 	"context"
@@ -14,7 +14,7 @@ func TestWeb3SignerClientUsingDockerNoKey(t *testing.T) {
 	defer func() {
 		stopWeb3SignerDocker(t)
 	}()
-	sut := NewWeb3SignerClient("http://localhost:9999")
+	sut := NewRemoteSignerClient("http://localhost:9999")
 	require.NotNil(t, sut)
 	_, err := sut.SignHash(context.Background(), common.Address{}, common.Hash{})
 	require.Error(t, err)

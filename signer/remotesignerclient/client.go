@@ -1,4 +1,4 @@
-package web3signerclient
+package remotesignerclient
 
 import (
 	"context"
@@ -12,17 +12,17 @@ import (
 	"github.com/ethereum/go-ethereum/rlp"
 )
 
-type Web3SignerClient struct {
+type RemoteSignerClient struct {
 	url string
 }
 
-func NewWeb3SignerClient(url string) *Web3SignerClient {
-	return &Web3SignerClient{
+func NewRemoteSignerClient(url string) *RemoteSignerClient {
+	return &RemoteSignerClient{
 		url: url,
 	}
 }
 
-func (e *Web3SignerClient) EthAccounts(ctx context.Context) ([]common.Address, error) {
+func (e *RemoteSignerClient) EthAccounts(ctx context.Context) ([]common.Address, error) {
 	response, err := rpc.JSONRPCCallWithContext(ctx, e.url, "eth_accounts")
 	if err != nil {
 		return nil, err
@@ -40,7 +40,7 @@ func (e *Web3SignerClient) EthAccounts(ctx context.Context) ([]common.Address, e
 	return result, nil
 }
 
-func (e *Web3SignerClient) SignHash(ctx context.Context,
+func (e *RemoteSignerClient) SignHash(ctx context.Context,
 	address common.Address,
 	hashToSign common.Hash) ([]byte, error) {
 	params := []interface{}{address, hashToSign}
@@ -61,8 +61,8 @@ func (e *Web3SignerClient) SignHash(ctx context.Context,
 	return result, nil
 }
 
-func (e *Web3SignerClient) SignTx(ctx context.Context, from common.Address, tx *types.Transaction) (*types.Transaction, error) {
-
+func (e *RemoteSignerClient) SignTx(ctx context.Context,
+	from common.Address, tx *types.Transaction) (*types.Transaction, error) {
 	params := map[string]interface{}{
 		"from": from.String(),
 	}
@@ -114,5 +114,4 @@ func (e *Web3SignerClient) SignTx(ctx context.Context, from common.Address, tx *
 		return nil, fmt.Errorf("SignTx signingHash differs:  %s!=%s", signer.Hash(tx).String(), signer.Hash(resTx).String())
 	}
 	return resTx, err
-
 }

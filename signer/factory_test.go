@@ -34,17 +34,17 @@ func TestSignerExploratory(t *testing.T) {
 	require.Equal(t, 65, len(sign))
 	fmt.Print(sign)
 	w3sConfig := SignerConfig{
-		Method: MethodWeb3Signer,
+		Method: MethodRemoteSigner,
 		Config: map[string]interface{}{
 			FieldURL: "http://localhost:9000",
 		},
 	}
-	web3signer, err := NewSigner(ctx, 0, w3sConfig, "test-w3s", logger)
+	remoteSigner, err := NewSigner(ctx, 0, w3sConfig, "test-w3s", logger)
 	require.NoError(t, err)
-	require.NotNil(t, web3signer)
-	require.NoError(t, web3signer.Initialize(ctx))
-	require.NotNil(t, web3signer.PublicAddress())
-	signW3s, err := web3signer.SignHash(ctx, hash)
+	require.NotNil(t, remoteSigner)
+	require.NoError(t, remoteSigner.Initialize(ctx))
+	require.NotNil(t, remoteSigner.PublicAddress())
+	signW3s, err := remoteSigner.SignHash(ctx, hash)
 	require.NoError(t, err)
 	require.NotNil(t, signW3s)
 	require.Equal(t, 65, len(signW3s))
@@ -86,9 +86,9 @@ func TestNewSigner(t *testing.T) {
 		require.Nil(t, sut)
 	})
 
-	t.Run("wrong web3signer config", func(t *testing.T) {
+	t.Run("wrong remote config", func(t *testing.T) {
 		sut, err := NewSigner(ctx, 1, SignerConfig{
-			Method: MethodWeb3Signer,
+			Method: MethodRemoteSigner,
 			Config: map[string]interface{}{
 				FieldAddress: 1234,
 			},
@@ -97,9 +97,9 @@ func TestNewSigner(t *testing.T) {
 		require.Nil(t, sut)
 	})
 
-	t.Run("wrong web3signer config2", func(t *testing.T) {
+	t.Run("wrong remote config2", func(t *testing.T) {
 		sut, err := NewSigner(ctx, 1, SignerConfig{
-			Method: MethodWeb3Signer,
+			Method: MethodRemoteSigner,
 			Config: map[string]interface{}{
 				FieldAddress: "NOTHEXA",
 			},
@@ -109,9 +109,9 @@ func TestNewSigner(t *testing.T) {
 		require.Nil(t, sut)
 	})
 
-	t.Run("wrong web3signer config3", func(t *testing.T) {
+	t.Run("wrong remote config3", func(t *testing.T) {
 		sut, err := NewSigner(ctx, 1, SignerConfig{
-			Method: MethodWeb3Signer,
+			Method: MethodRemoteSigner,
 			Config: map[string]interface{}{
 				FieldAddress: "0x71C7656EC7ab88b098defB751B7401B5f6d8976F",
 				FieldURL:     1234,
@@ -122,9 +122,9 @@ func TestNewSigner(t *testing.T) {
 		require.Nil(t, sut)
 	})
 
-	t.Run("wrong web3signer missing URL", func(t *testing.T) {
+	t.Run("wrong remote missing URL", func(t *testing.T) {
 		sut, err := NewSigner(ctx, 1, SignerConfig{
-			Method: MethodWeb3Signer,
+			Method: MethodRemoteSigner,
 			Config: map[string]interface{}{
 				FieldAddress: "0x71C7656EC7ab88b098defB751B7401B5f6d8976F",
 			},
@@ -134,9 +134,9 @@ func TestNewSigner(t *testing.T) {
 		require.Nil(t, sut)
 	})
 
-	t.Run("web3signer config", func(t *testing.T) {
+	t.Run("remote config", func(t *testing.T) {
 		sut, err := NewSigner(ctx, 1, SignerConfig{
-			Method: MethodWeb3Signer,
+			Method: MethodRemoteSigner,
 			Config: map[string]interface{}{
 				FieldAddress: "0x71C7656EC7ab88b098defB751B7401B5f6d8976F",
 				FieldURL:     "http://localhost:9001",

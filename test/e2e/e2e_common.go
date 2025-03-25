@@ -15,16 +15,17 @@ import (
 
 // shutdownDockerAfterTest:  set to false if you want to inspect the container
 // after running the test
-const shutdownDockerAfterTest = false
+const shutdownDockerAfterTest = true
 
 // dockerIsAlreadyRunning: set to true if you want to start manually the containers
 // or you want to take advantage of previous run
-const dockerIsAlreadyRunning = true
+const dockerIsAlreadyRunning = false
 
 const gethURL = "http://localhost:8545"
 const defaultChainID = uint64(1337)
 
 func testSendEthTx(t *testing.T, fromAddress common.Address, txSigner signer.TxSigner) {
+	t.Helper()
 	client, err := ethclient.Dial(gethURL)
 	require.NoError(t, err)
 	defer client.Close()
@@ -32,8 +33,8 @@ func testSendEthTx(t *testing.T, fromAddress common.Address, txSigner signer.TxS
 	nonce, err := client.PendingNonceAt(context.Background(), fromAddress)
 	require.NoError(t, err)
 	// 0.0001 ETH en wei = 0.0001 * 10^18 = 100,000,000,000,000 (1e14)
-	value := big.NewInt(1e14)
-	gasLimit := uint64(21000)
+	value := big.NewInt(1e14) //nolint:mnd
+	gasLimit := uint64(21000) //nolint:mnd
 	gasPrice, err := client.SuggestGasPrice(context.Background())
 	require.NoError(t, err)
 	tx := types.NewTransaction(nonce, toAddress, value, gasLimit, gasPrice, nil)

@@ -16,7 +16,9 @@ import (
 const (
 	FieldPath     = "path"
 	FieldPassword = "password"
-	enableEIP155  = true
+	// EIP155 is not enabled because the rest of user of this library
+	// expected that signing a hash doesn't add anything else.
+	enableEIP155 = false
 )
 
 // LocalSign is a signer that uses a local keystore file
@@ -70,7 +72,8 @@ func NewLocalConfig(cfg SignerConfig) (signercommon.KeystoreFileConfig, error) {
 // logger is the logger to use
 // file is the keystore file config
 // chainID is the chainID to use (required to sync tx)
-func NewLocalSign(name string, logger signercommon.Logger, file signercommon.KeystoreFileConfig, chainID uint64) *LocalSign {
+func NewLocalSign(name string, logger signercommon.Logger,
+	file signercommon.KeystoreFileConfig, chainID uint64) *LocalSign {
 	return &LocalSign{
 		name:    name,
 		logger:  logger,
@@ -142,16 +145,19 @@ func (e *LocalSign) SignHash(ctx context.Context, hash common.Hash) ([]byte, err
 	if e.privateKey == nil {
 		return nil, fmt.Errorf("%s private key is nil", e.logPrefix())
 	}
-	// length of the hash is 32 bytes, so it's hardcoded
-	hashWithPrefix := crypto.Keccak256(append([]byte("\x19Ethereum Signed Message:\n32"), hash.Bytes()...))
-	sig, err := crypto.Sign(hashWithPrefix, e.privateKey)
-	if err != nil {
-		return nil, fmt.Errorf("%s can't sign hash. Err: %w", e.logPrefix(), err)
+	if enableEIP155 {
+		// length of the hash is 32 bytes, so it's hardcoded
+		hashWithPrefix := crypto.Keccak256(append([]byte("\x19Ethereum Signed Message:\n32"), hash.Bytes()...))
+		sig, err := crypto.Sign(hashWithPrefix, e.privateKey)
+		if err != nil {
+			return nil, fmt.Errorf("%s can't sign hash. Err: %w", e.logPrefix(), err)
+		}
+		// Set r(recoveryID) as eth_sign that is 27 or 28
+		// crypto.Sign returns  0 or 1
+		sig[64] += 27
+		return sig, err
 	}
-	// Set r(recoveryID) as eth_sign that is 27 or 28
-	// crypto.Sign returns  0 or 1
-	sig[64] = sig[64] + 27
-	return sig, err
+	return crypto.Sign(hash.Bytes(), e.privateKey)
 }
 
 func (e *LocalSign) PublicAddress() common.Address {

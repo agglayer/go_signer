@@ -60,7 +60,7 @@ func TestLocalSigner(t *testing.T) {
 	require.NoError(t, err)
 	require.NotNil(t, signed)
 	log.Debugf("signed hash: %s", common.Bytes2Hex(signed))
-	require.Equal(t, "e82ed51b2b3964a6779171ee6589b1b2f5b5ebb77c1555626205d4619cb8df271a3f5c43f6b0ea3c76d852252d8a19539aa3ca2cb9fb66af3ac4dee7e846b4321c",
+	require.Equal(t, "b8823364c90ea0d2700d5ad0fe39d16778bc07ce7df4779ff35e4b2660d043cb74a002439225d1d518f9f1cf3db005f5e143196543fd5146a34bf63f0b810ade00",
 		common.Bytes2Hex(signed))
 
 	testSendEthTx(t, sign.PublicAddress(), sign)
