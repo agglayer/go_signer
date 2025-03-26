@@ -2,55 +2,12 @@ package signer
 
 import (
 	"context"
-	"fmt"
 	"testing"
 
 	"github.com/agglayer/go_signer/log"
 	signertypes "github.com/agglayer/go_signer/signer/types"
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/require"
 )
-
-func TestSignerExploratory(t *testing.T) {
-	t.Skip("This test is for exploratory purposes only")
-	logger := log.WithFields("test", "test")
-	ctx := context.TODO()
-	localConfig := signertypes.SignerConfig{
-		Method: signertypes.MethodLocal,
-		Config: map[string]interface{}{
-			FieldPath:     "../tmp/local_config/sequencer.keystore",
-			FieldPassword: "pSnv6Dh5s9ahuzGzH9RoCDrKAMddaX3m",
-		},
-	}
-
-	local, err := NewSigner(ctx, 0, localConfig, "test-local", logger)
-	require.NoError(t, err)
-	require.NotNil(t, local)
-	require.NoError(t, local.Initialize(ctx))
-	require.NotNil(t, local.PublicAddress())
-	hash := common.Hash{}
-	sign, err := local.SignHash(ctx, hash)
-	require.NoError(t, err)
-	require.NotNil(t, sign)
-	require.Equal(t, 65, len(sign))
-	fmt.Print(sign)
-	w3sConfig := signertypes.SignerConfig{
-		Method: signertypes.MethodRemoteSigner,
-		Config: map[string]interface{}{
-			FieldURL: "http://localhost:9000",
-		},
-	}
-	remoteSigner, err := NewSigner(ctx, 0, w3sConfig, "test-w3s", logger)
-	require.NoError(t, err)
-	require.NotNil(t, remoteSigner)
-	require.NoError(t, remoteSigner.Initialize(ctx))
-	require.NotNil(t, remoteSigner.PublicAddress())
-	signW3s, err := remoteSigner.SignHash(ctx, hash)
-	require.NoError(t, err)
-	require.NotNil(t, signW3s)
-	require.Equal(t, 65, len(signW3s))
-	fmt.Print(signW3s)
-}
 
 func TestNewSigner(t *testing.T) {
 	logger := log.WithFields("test", "test")
