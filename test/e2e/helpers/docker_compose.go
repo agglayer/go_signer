@@ -20,16 +20,14 @@ func NewDockerCompose() *DockerCompose {
 func (d *DockerCompose) Up(t *testing.T) {
 	t.Helper()
 	log.Debug("starting docker")
-	msg, err := exec.Command("bash", "-l", "-c", "docker compose up -d").CombinedOutput()
-	require.NoError(t, err, string(msg))
-	log.Debug(string(msg))
+	runCommand(t, true, "docker compose down")
 	log.Debug("docker started")
 }
 
 func (d *DockerCompose) Down(t *testing.T) {
 	t.Helper()
-	msg, err := exec.Command("bash", "-l", "-c", "docker compose down").CombinedOutput()
-	require.NoError(t, err, string(msg))
+	runCommand(t, true, "docker compose down")
+	log.Debug("docker down")
 }
 
 func (d *DockerCompose) WaitHealthy(t *testing.T, timeout time.Duration) {
@@ -53,7 +51,6 @@ func (d *DockerCompose) WaitHealthy(t *testing.T, timeout time.Duration) {
 			log.Infof("dockers healty OK")
 			return
 		}
-
 		time.Sleep(1 * time.Second)
 	}
 }
