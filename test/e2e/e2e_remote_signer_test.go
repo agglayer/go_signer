@@ -7,6 +7,7 @@ import (
 
 	"github.com/agglayer/go_signer/log"
 	"github.com/agglayer/go_signer/signer"
+	signertypes "github.com/agglayer/go_signer/signer/types"
 	"github.com/agglayer/go_signer/test/e2e/helpers"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/require"
@@ -29,8 +30,8 @@ func TestRemoteSigner(t *testing.T) {
 		dockerCompose.WaitHealthy(t, 40*time.Second)
 	}
 	ctx := context.TODO()
-	sign, err := signer.NewSigner(ctx, defaultChainID, signer.SignerConfig{
-		Method: signer.MethodRemoteSigner,
+	sign, err := signer.NewSigner(ctx, defaultChainID, signertypes.SignerConfig{
+		Method: signertypes.MethodRemoteSigner,
 		Config: map[string]interface{}{
 			signer.FieldURL:     "http://localhost:9999",
 			signer.FieldAddress: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",

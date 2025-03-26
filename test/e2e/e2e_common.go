@@ -6,7 +6,7 @@ import (
 	"testing"
 
 	"github.com/agglayer/go_signer/log"
-	"github.com/agglayer/go_signer/signer"
+	signertypes "github.com/agglayer/go_signer/signer/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -15,16 +15,16 @@ import (
 
 // shutdownDockerAfterTest:  set to false if you want to inspect the container
 // after running the test
-const shutdownDockerAfterTest = true
+const shutdownDockerAfterTest = false
 
 // dockerIsAlreadyRunning: set to true if you want to start manually the containers
 // or you want to take advantage of previous run
-const dockerIsAlreadyRunning = false
+const dockerIsAlreadyRunning = true
 
 const gethURL = "http://localhost:8545"
 const defaultChainID = uint64(1337)
 
-func testSendEthTx(t *testing.T, fromAddress common.Address, txSigner signer.TxSigner) {
+func testSendEthTx(t *testing.T, fromAddress common.Address, txSigner signertypes.TxSigner) {
 	t.Helper()
 	client, err := ethclient.Dial(gethURL)
 	require.NoError(t, err)

@@ -7,6 +7,7 @@ import (
 	"math/big"
 
 	signercommon "github.com/agglayer/go_signer/common"
+	signertypes "github.com/agglayer/go_signer/signer/types"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -34,9 +35,9 @@ type LocalSign struct {
 }
 
 // NewLocalSignerConfig creates a generic config  (SignerConfig)
-func NewLocalSignerConfig(path, pass string) SignerConfig {
-	return SignerConfig{
-		Method: MethodLocal,
+func NewLocalSignerConfig(path, pass string) signertypes.SignerConfig {
+	return signertypes.SignerConfig{
+		Method: signertypes.MethodLocal,
 		Config: map[string]interface{}{
 			FieldPath:     path,
 			FieldPassword: pass,
@@ -45,7 +46,7 @@ func NewLocalSignerConfig(path, pass string) SignerConfig {
 }
 
 // NewLocalConfig creates a KeystoreFileConfig (specific config) from a SignerConfig
-func NewLocalConfig(cfg SignerConfig) (signercommon.KeystoreFileConfig, error) {
+func NewLocalConfig(cfg signertypes.SignerConfig) (signercommon.KeystoreFileConfig, error) {
 	var res signercommon.KeystoreFileConfig
 	// If there are no field in the config, return empty config
 	// but if there are some field must match the expected ones
@@ -169,7 +170,7 @@ func (e *LocalSign) String() string {
 }
 
 func (e *LocalSign) logPrefix() string {
-	return fmt.Sprintf("signer: %s[%s]: ", MethodLocal, e.name)
+	return fmt.Sprintf("signer: %s[%s]: ", signertypes.MethodLocal, e.name)
 }
 
 func (e *LocalSign) SignTx(ctx context.Context, tx *types.Transaction) (*types.Transaction, error) {

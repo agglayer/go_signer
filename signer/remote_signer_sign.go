@@ -6,6 +6,7 @@ import (
 
 	signercommon "github.com/agglayer/go_signer/common"
 	web3signerclient "github.com/agglayer/go_signer/signer/remotesignerclient"
+	signertypes "github.com/agglayer/go_signer/signer/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 )
@@ -28,7 +29,7 @@ type RemoteSignerConfig struct {
 	Address common.Address
 }
 
-func NewRemoteSignerConfig(cfg SignerConfig) (RemoteSignerConfig, error) {
+func NewRemoteSignerConfig(cfg signertypes.SignerConfig) (RemoteSignerConfig, error) {
 	var addr common.Address
 	addrField, ok := cfg.Config[FieldAddress]
 	// Field Address is optional
@@ -36,22 +37,22 @@ func NewRemoteSignerConfig(cfg SignerConfig) (RemoteSignerConfig, error) {
 		s, ok := addrField.(string)
 		if !ok {
 			return RemoteSignerConfig{}, fmt.Errorf("config %s: field %s is not string %v",
-				MethodRemoteSigner, FieldAddress, addrField)
+				signertypes.MethodRemoteSigner, FieldAddress, addrField)
 		}
 		if !common.IsHexAddress(s) {
-			return RemoteSignerConfig{}, fmt.Errorf("config %s: invalid field %s: %s", MethodRemoteSigner, FieldAddress, s)
+			return RemoteSignerConfig{}, fmt.Errorf("config %s: invalid field %s: %s", signertypes.MethodRemoteSigner, FieldAddress, s)
 		}
 		addr = common.HexToAddress(s)
 	}
 	urlIntf, ok := cfg.Config[FieldURL]
 	// Field URL is mandatory
 	if !ok {
-		return RemoteSignerConfig{}, fmt.Errorf("config %s: field %s is not present", MethodRemoteSigner, FieldURL)
+		return RemoteSignerConfig{}, fmt.Errorf("config %s: field %s is not present", signertypes.MethodRemoteSigner, FieldURL)
 	}
 	urlStr, ok := urlIntf.(string)
 	if !ok {
 		return RemoteSignerConfig{}, fmt.Errorf("config %s: field %s is not string %v",
-			MethodRemoteSigner, FieldURL, cfg.Config["url"])
+			signertypes.MethodRemoteSigner, FieldURL, cfg.Config["url"])
 	}
 	return RemoteSignerConfig{
 		URL:     urlStr,
@@ -128,9 +129,9 @@ func (e *RemoteSignerSign) PublicAddress() common.Address {
 }
 
 func (e *RemoteSignerSign) logPrefix() string {
-	return fmt.Sprintf("signer: %s[%s]: ", MethodRemoteSigner, e.name)
+	return fmt.Sprintf("signer: %s[%s]: ", signertypes.MethodRemoteSigner, e.name)
 }
 
 func (e *RemoteSignerSign) String() string {
-	return fmt.Sprintf("signer: %s[%s]: pubAddr: %s", MethodRemoteSigner, e.name, e.address.String())
+	return fmt.Sprintf("signer: %s[%s]: pubAddr: %s", signertypes.MethodRemoteSigner, e.name, e.address.String())
 }
