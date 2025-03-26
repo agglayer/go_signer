@@ -34,7 +34,7 @@ func (d *DockerCompose) WaitHealthy(t *testing.T, timeout time.Duration) {
 	t.Helper()
 	end := time.Now().Add(timeout)
 	for time.Now().Before(end) {
-		msg, err := exec.Command("bash", "-l", "-c", `docker compose ps -q \
+		msg, err := exec.Command(bash, "-l", "-c", `docker compose ps -q \
 | xargs -I {} docker inspect \
     --format='{{if .Config.Healthcheck}}{{.Name}} => {{.State.Health.Status}}{{end}}' {}
 `).CombinedOutput()
