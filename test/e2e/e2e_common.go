@@ -4,26 +4,30 @@ import (
 	"context"
 	"math/big"
 	"testing"
+	"time"
 
 	"github.com/agglayer/go_signer/log"
 	signertypes "github.com/agglayer/go_signer/signer/types"
+	"github.com/agglayer/go_signer/test/e2e/helpers"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
 	"github.com/stretchr/testify/require"
 )
 
-// shutdownDockerAfterTest:  set to false if you want to inspect the container
-// after running the test
-const shutdownDockerAfterTest = false
+const (
+	// shutdownDockerAfterTest:  set to false if you want to inspect the container
+	// after running the test
+	shutdownDockerAfterTest = false
 
-// dockerIsAlreadyRunning: set to true if you want to start manually the containers
-// or you want to take advantage of previous run
-const dockerIsAlreadyRunning = true
+	// dockerIsAlreadyRunning: set to true if you want to start manually the containers
+	// or you want to take advantage of previous run
+	dockerIsAlreadyRunning = true
 
-const gethURL = "http://localhost:8545"
-const defaultChainID = uint64(1337)
-const publicAddressTest = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+	gethURL           = "http://localhost:8545"
+	defaultChainID    = uint64(1337)
+	publicAddressTest = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+)
 
 func testSendEthTx(t *testing.T, fromAddress common.Address, txSigner signertypes.TxSigner) {
 	t.Helper()
@@ -46,4 +50,45 @@ func testSendEthTx(t *testing.T, fromAddress common.Address, txSigner signertype
 	balance, err := client.BalanceAt(context.Background(), fromAddress, nil)
 	require.NoError(t, err)
 	log.Infof("balance: %s", balance.String())
+}
+
+func testGenericSignerE2E(t *testing.T, funcCreateSigner func(t *testing.T, ctx context.Context, chainID uint64) (signertypes.Signer, error)) {
+	t.Helper()
+	if testing.Short() {
+		t.Skip()
+	}
+
+	if !dockerIsAlreadyRunning {
+		dockerCompose := helpers.NewDockerCompose()
+		dockerCompose.Down(t)
+		dockerCompose.Up(t)
+		defer func() {
+			if shutdownDockerAfterTest {
+				dockerCompose.Down(t)
+			}
+		}()
+		dockerCompose.WaitHealthy(t, 40*time.Second)
+	}
+	ctx := context.TODO()
+	ethClient, err := ethclient.Dial(gethURL)
+	require.NoError(t, err)
+	defer ethClient.Close()
+	chainID, err := ethClient.ChainID(ctx)
+	require.NoError(t, err)
+	log.Info("chainID: ", chainID.Uint64())
+	sign, err := funcCreateSigner(t, ctx, chainID.Uint64())
+	require.NoError(t, err)
+
+	err = sign.Initialize(ctx)
+	require.NoError(t, err)
+	require.Equal(t, publicAddressTest, sign.PublicAddress().String())
+
+	signed, err := sign.SignHash(ctx, common.Hash{})
+	require.NoError(t, err)
+	require.NotNil(t, signed)
+	log.Debugf("signed hash: %s", common.Bytes2Hex(signed))
+	require.Equal(t, "b8823364c90ea0d2700d5ad0fe39d16778bc07ce7df4779ff35e4b2660d043cb74a002439225d1d518f9f1cf3db005f5e143196543fd5146a34bf63f0b810ade00",
+		common.Bytes2Hex(signed))
+
+	testSendEthTx(t, sign.PublicAddress(), sign)
 }
