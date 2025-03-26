@@ -8,16 +8,20 @@ import (
 )
 
 func startWeb3SignerDocker(t *testing.T) {
-	t.Helper()
-	stopWeb3SignerDocker(t)
-	msg, err := exec.Command("bash", "-l", "-c", "docker run -d -p 9999:9000 --name web3signer consensys/web3signer:develop --http-listen-port=9000 eth1 --chain-id 123").CombinedOutput()
-	require.NoError(t, err, string(msg))
+	runCommand(t, true, "docker run -d -p 9999:9000 --name web3signer consensys/web3signer:develop --http-listen-port=9000 eth1 --chain-id 123")
 }
 
 func stopWeb3SignerDocker(t *testing.T) {
+	runCommand(t, false, "docker stop web3signer; docker rm web3signer")
+}
+
+func runCommand(t *testing.T, mustBeOk bool, command string) {
 	t.Helper()
-	_, err := exec.Command("bash", "-l", "-c", "docker stop web3signer; docker rm web3signer").CombinedOutput()
+	msg, err := exec.Command("bash", "-l", "-c", command).CombinedOutput()
 	if err != nil {
 		t.Log(err)
+	}
+	if mustBeOk {
+		require.NoError(t, err, string(msg))
 	}
 }
