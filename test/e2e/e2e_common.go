@@ -23,6 +23,7 @@ const dockerIsAlreadyRunning = true
 
 const gethURL = "http://localhost:8545"
 const defaultChainID = uint64(1337)
+const publicAddressTest = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
 
 func testSendEthTx(t *testing.T, fromAddress common.Address, txSigner signertypes.TxSigner) {
 	t.Helper()

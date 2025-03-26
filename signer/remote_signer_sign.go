@@ -40,14 +40,16 @@ func NewRemoteSignerConfig(cfg signertypes.SignerConfig) (RemoteSignerConfig, er
 				signertypes.MethodRemoteSigner, FieldAddress, addrField)
 		}
 		if !common.IsHexAddress(s) {
-			return RemoteSignerConfig{}, fmt.Errorf("config %s: invalid field %s: %s", signertypes.MethodRemoteSigner, FieldAddress, s)
+			return RemoteSignerConfig{},
+				fmt.Errorf("config %s: invalid field %s: %s", signertypes.MethodRemoteSigner, FieldAddress, s)
 		}
 		addr = common.HexToAddress(s)
 	}
 	urlIntf, ok := cfg.Config[FieldURL]
 	// Field URL is mandatory
 	if !ok {
-		return RemoteSignerConfig{}, fmt.Errorf("config %s: field %s is not present", signertypes.MethodRemoteSigner, FieldURL)
+		return RemoteSignerConfig{},
+			fmt.Errorf("config %s: field %s is not present", signertypes.MethodRemoteSigner, FieldURL)
 	}
 	urlStr, ok := urlIntf.(string)
 	if !ok {

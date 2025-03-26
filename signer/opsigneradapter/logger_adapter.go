@@ -1,7 +1,6 @@
 package opsigneradapter
 
 import (
-	//opsignerprovider "github.com/ethereum-optimism/infra/op-signer/provider"
 	"context"
 	"log/slog"
 

@@ -34,15 +34,14 @@ func TestRemoteSigner(t *testing.T) {
 		Method: signertypes.MethodRemoteSigner,
 		Config: map[string]interface{}{
 			signer.FieldURL:     "http://localhost:9999",
-			signer.FieldAddress: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+			signer.FieldAddress: publicAddressTest,
 		},
 	}, "test", log.WithFields("module", "test"))
 	require.NoError(t, err)
 
 	err = sign.Initialize(ctx)
 	require.NoError(t, err)
-	expectedPublicAddress := "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
-	require.Equal(t, expectedPublicAddress, sign.PublicAddress().String())
+	require.Equal(t, publicAddressTest, sign.PublicAddress().String())
 
 	// Can't sign using eth_sign because EIP155 prefix the data with a string
 	// and the aggkit expect to have a signature of just the hash

@@ -51,8 +51,7 @@ func TestGCPSigner(t *testing.T) {
 
 	err = sign.Initialize(ctx)
 	require.NoError(t, err)
-	expectedPublicAddress := "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
-	require.Equal(t, expectedPublicAddress, sign.PublicAddress().String(), "public_addr")
+	require.Equal(t, publicAddressTest, sign.PublicAddress().String(), "public_addr")
 
 	signed, err := sign.SignHash(ctx, common.Hash{})
 	require.NoError(t, err)

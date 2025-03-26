@@ -27,7 +27,8 @@ func NewSignerAdapter(ctx context.Context, opSigner opsignerprovider.SignaturePr
 	}
 }
 
-func NewSignerAdapterFromConfig(ctx context.Context, logger signercommon.Logger, cfg gosignertypes.SignerConfig) (*SignerAdapter, error) {
+func NewSignerAdapterFromConfig(ctx context.Context, logger signercommon.Logger,
+	cfg gosignertypes.SignerConfig) (*SignerAdapter, error) {
 	opConfig := opsignerprovider.ProviderConfig{
 		ProviderType: opsignerprovider.ProviderType(cfg.Method),
 	}
