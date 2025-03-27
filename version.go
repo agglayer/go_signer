@@ -1,4 +1,4 @@
-package gosigner
+package go_signer
 
 import (
 	"fmt"
@@ -7,7 +7,7 @@ import (
 )
 
 var (
-	Version = "v0.0.3"
+	Version = "v0.0.4"
 )
 
 // PrintVersion prints version info into the provided io.Writer.
