@@ -20,7 +20,7 @@ func NewDockerCompose() *DockerCompose {
 func (d *DockerCompose) Up(t *testing.T) {
 	t.Helper()
 	log.Debug("starting docker")
-	runCommand(t, true, "docker compose down")
+	runCommand(t, true, "docker compose up -d")
 	log.Debug("docker started")
 }
 

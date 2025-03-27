@@ -17,13 +17,10 @@ import (
 )
 
 const (
-	// shutdownDockerAfterTest:  set to false if you want to inspect the container
-	// after running the test
-	shutdownDockerAfterTest = false
 
 	// dockerIsAlreadyRunning: set to true if you want to start manually the containers
 	// or you want to take advantage of previous run
-	dockerIsAlreadyRunning = true
+	dockerIsAlreadyRunning = false
 
 	gethURL                = "http://localhost:8545"
 	defaultChainID         = uint64(1337)
