@@ -24,9 +24,10 @@ const (
 	// or you want to take advantage of previous run
 	dockerIsAlreadyRunning = true
 
-	gethURL           = "http://localhost:8545"
-	defaultChainID    = uint64(1337)
-	publicAddressTest = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+	gethURL                = "http://localhost:8545"
+	defaultChainID         = uint64(1337)
+	publicAddressTest      = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
+	sleepWaitDockerHealthy = 40 * time.Second
 )
 
 func testSendEthTx(t *testing.T, fromAddress common.Address, txSigner signertypes.TxSigner) {
@@ -67,7 +68,7 @@ func testGenericSignerE2E(t *testing.T, funcCreateSigner func(t *testing.T, ctx 
 				dockerCompose.Down(t)
 			}
 		}()
-		dockerCompose.WaitHealthy(t, 40*time.Second)
+		dockerCompose.WaitHealthy(t, sleepWaitDockerHealthy)
 	}
 	ctx := context.TODO()
 	ethClient, err := ethclient.Dial(gethURL)

@@ -13,6 +13,7 @@ import (
 )
 
 func createLocalSigner(t *testing.T, ctx context.Context, chainID uint64) (signertypes.Signer, error) {
+	t.Helper()
 	password, err := os.ReadFile("key_store/funded_addr.password")
 	require.NoError(t, err)
 	trimmedPassword := strings.TrimSpace(string(password))
