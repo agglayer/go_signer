@@ -26,5 +26,8 @@ func createLocalSigner(t *testing.T, ctx context.Context, chainID uint64) (signe
 	}, "test", log.WithFields("module", "test"))
 }
 func TestLocalSigner(t *testing.T) {
-	testGenericSignerE2E(t, createLocalSigner)
+	testGenericSignerE2E(t, e2eTestParams{
+		createSignerFunc: createLocalSigner,
+		canSign:          true,
+	})
 }

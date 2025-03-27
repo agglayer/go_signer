@@ -22,5 +22,8 @@ func createRemoteSigner(t *testing.T, ctx context.Context, chainID uint64) (sign
 
 // TestRemoteSigner tests the web3signer signer
 func TestRemoteSigner(t *testing.T) {
-	testGenericSignerE2E(t, createRemoteSigner)
+	testGenericSignerE2E(t, e2eTestParams{
+		createSignerFunc: createRemoteSigner,
+		canSign:          false,
+	})
 }

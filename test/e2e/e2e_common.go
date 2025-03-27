@@ -3,6 +3,7 @@ package e2e
 import (
 	"context"
 	"math/big"
+	"sync"
 	"testing"
 	"time"
 
@@ -30,6 +31,58 @@ const (
 	sleepWaitDockerHealthy = 40 * time.Second
 )
 
+var (
+	mu         sync.Mutex
+	dockerIsUp = false
+)
+
+type e2eTestParams struct {
+	createSignerFunc func(t *testing.T, ctx context.Context, chainID uint64) (signertypes.Signer, error)
+	canSign          bool
+}
+
+func testGenericSignerE2E(t *testing.T, params e2eTestParams) {
+	t.Helper()
+	if testing.Short() {
+		t.Skip()
+	}
+	mu.Lock()
+	if !dockerIsUp && !dockerIsAlreadyRunning {
+		dockerCompose := helpers.NewDockerCompose()
+		dockerCompose.Down(t)
+		dockerCompose.Up(t)
+		dockerCompose.WaitHealthy(t, sleepWaitDockerHealthy)
+		dockerIsUp = true
+	}
+	mu.Unlock()
+	ctx := context.TODO()
+	ethClient, err := ethclient.Dial(gethURL)
+	require.NoError(t, err)
+	defer ethClient.Close()
+	chainID, err := ethClient.ChainID(ctx)
+	require.NoError(t, err)
+	log.Info("chainID: ", chainID.Uint64())
+	sign, err := params.createSignerFunc(t, ctx, chainID.Uint64())
+	require.NoError(t, err)
+
+	err = sign.Initialize(ctx)
+	require.NoError(t, err)
+	require.Equal(t, publicAddressTest, sign.PublicAddress().String())
+
+	signed, err := sign.SignHash(ctx, common.Hash{})
+	if params.canSign {
+		require.NoError(t, err)
+		require.NotNil(t, signed)
+		log.Debugf("signed hash: %s", common.Bytes2Hex(signed))
+		require.Equal(t, "b8823364c90ea0d2700d5ad0fe39d16778bc07ce7df4779ff35e4b2660d043cb74a002439225d1d518f9f1cf3db005f5e143196543fd5146a34bf63f0b810ade00",
+			common.Bytes2Hex(signed))
+	} else {
+		require.Error(t, err)
+	}
+
+	testSendEthTx(t, sign.PublicAddress(), sign)
+}
+
 func testSendEthTx(t *testing.T, fromAddress common.Address, txSigner signertypes.TxSigner) {
 	t.Helper()
 	client, err := ethclient.Dial(gethURL)
@@ -51,45 +104,4 @@ func testSendEthTx(t *testing.T, fromAddress common.Address, txSigner signertype
 	balance, err := client.BalanceAt(context.Background(), fromAddress, nil)
 	require.NoError(t, err)
 	log.Infof("balance: %s", balance.String())
-}
-
-func testGenericSignerE2E(t *testing.T, funcCreateSigner func(t *testing.T, ctx context.Context, chainID uint64) (signertypes.Signer, error)) {
-	t.Helper()
-	if testing.Short() {
-		t.Skip()
-	}
-
-	if !dockerIsAlreadyRunning {
-		dockerCompose := helpers.NewDockerCompose()
-		dockerCompose.Down(t)
-		dockerCompose.Up(t)
-		defer func() {
-			if shutdownDockerAfterTest {
-				dockerCompose.Down(t)
-			}
-		}()
-		dockerCompose.WaitHealthy(t, sleepWaitDockerHealthy)
-	}
-	ctx := context.TODO()
-	ethClient, err := ethclient.Dial(gethURL)
-	require.NoError(t, err)
-	defer ethClient.Close()
-	chainID, err := ethClient.ChainID(ctx)
-	require.NoError(t, err)
-	log.Info("chainID: ", chainID.Uint64())
-	sign, err := funcCreateSigner(t, ctx, chainID.Uint64())
-	require.NoError(t, err)
-
-	err = sign.Initialize(ctx)
-	require.NoError(t, err)
-	require.Equal(t, publicAddressTest, sign.PublicAddress().String())
-
-	signed, err := sign.SignHash(ctx, common.Hash{})
-	require.NoError(t, err)
-	require.NotNil(t, signed)
-	log.Debugf("signed hash: %s", common.Bytes2Hex(signed))
-	require.Equal(t, "b8823364c90ea0d2700d5ad0fe39d16778bc07ce7df4779ff35e4b2660d043cb74a002439225d1d518f9f1cf3db005f5e143196543fd5146a34bf63f0b810ade00",
-		common.Bytes2Hex(signed))
-
-	testSendEthTx(t, sign.PublicAddress(), sign)
 }
