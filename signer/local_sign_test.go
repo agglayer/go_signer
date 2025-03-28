@@ -9,6 +9,7 @@ import (
 
 	signercommon "github.com/agglayer/go_signer/common"
 	"github.com/agglayer/go_signer/log"
+	signertypes "github.com/agglayer/go_signer/signer/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/stretchr/testify/require"
 )
@@ -16,7 +17,7 @@ import (
 // To keep compatibility with previous version, an empty config file
 // meant there is no privateKey (nil), so the idea is keep the same behavior
 func TestNewKeyStoreFileConfigEmpty(t *testing.T) {
-	cfg, err := NewLocalConfig(SignerConfig{})
+	cfg, err := NewLocalConfig(signertypes.SignerConfig{})
 	require.NoError(t, err)
 	require.Equal(t, "", cfg.Path)
 	require.Equal(t, "", cfg.Password)
@@ -24,7 +25,7 @@ func TestNewKeyStoreFileConfigEmpty(t *testing.T) {
 
 func TestNewLocalSignerConfig(t *testing.T) {
 	cfg := NewLocalSignerConfig("/app/sequencer.keystore", "test")
-	require.Equal(t, MethodLocal, cfg.Method)
+	require.Equal(t, signertypes.MethodLocal, cfg.Method)
 	require.Equal(t, "/app/sequencer.keystore", cfg.Config[FieldPath])
 	require.Equal(t, "test", cfg.Config[FieldPassword])
 
@@ -42,7 +43,7 @@ func TestNewLocalSignerConfigWrongData(t *testing.T) {
 }
 
 func TestNewLocalSign(t *testing.T) {
-	sut := NewLocalSign("name", nil, signercommon.KeystoreFileConfig{})
+	sut := NewLocalSign("name", nil, signercommon.KeystoreFileConfig{}, 0)
 	require.NotNil(t, sut)
 	require.Equal(t, "name", sut.name)
 	require.Nil(t, sut.logger)
@@ -66,7 +67,7 @@ func TestNewLocalSignFromPrivateKey(t *testing.T) {
 
 func TestNewLocalSignEmpty(t *testing.T) {
 	logger := log.WithFields("test", "test")
-	sut := NewLocalSign("name", logger, signercommon.KeystoreFileConfig{})
+	sut := NewLocalSign("name", logger, signercommon.KeystoreFileConfig{}, 0)
 	err := sut.Initialize(context.Background())
 	require.NoError(t, err)
 	pubAddr := sut.PublicAddress()
