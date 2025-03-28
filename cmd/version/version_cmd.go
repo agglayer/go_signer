@@ -3,11 +3,11 @@ package version
 import (
 	"os"
 
-	"github.com/agglayer/go_signer"
+	gosigner "github.com/agglayer/go_signer"
 	cli "github.com/urfave/cli/v2"
 )
 
 func VersionCmd(*cli.Context) error {
-	go_signer.PrintVersion(os.Stdout)
+	gosigner.PrintVersion(os.Stdout)
 	return nil
 }

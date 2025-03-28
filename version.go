@@ -1,4 +1,4 @@
-package go_signer
+package gosigner
 
 import (
 	"fmt"
