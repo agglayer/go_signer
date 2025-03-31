@@ -30,6 +30,11 @@ func TestNewSigner(t *testing.T) {
 			expectedError: false,
 		},
 		{
+			name:          "empty method is local",
+			config:        signertypes.SignerConfig{Method: signertypes.MethodNone},
+			expectedError: false,
+		},
+		{
 			name: "wrong local config",
 			config: signertypes.SignerConfig{
 				Config: map[string]interface{}{

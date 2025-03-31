@@ -44,6 +44,10 @@ func NewSignerAdapterFromConfig(ctx context.Context, logger signercommon.Logger,
 }
 
 func (s *SignerAdapter) Initialize(context.Context) error {
+	_, err := s.opSigner.GetPublicKey(s.ctx, s.keyName)
+	if err != nil {
+		return fmt.Errorf("fails to Initialize because error getting public key from opSigner. Err: %w", err)
+	}
 	return nil
 }
 

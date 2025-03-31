@@ -20,7 +20,7 @@ const (
 
 	// dockerIsAlreadyRunning: set to true if you want to start manually the containers
 	// or you want to take advantage of previous run
-	dockerIsAlreadyRunning = false
+	dockerIsAlreadyRunning = true
 
 	gethURL                = "http://localhost:8545"
 	defaultChainID         = uint64(1337)

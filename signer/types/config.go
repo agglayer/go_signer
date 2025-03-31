@@ -5,6 +5,7 @@ import "fmt"
 type SignMethod string
 
 var (
+	MethodNone         SignMethod = "none"
 	MethodLocal        SignMethod = "local"
 	MethodRemoteSigner SignMethod = "remote"
 	MethodGCPKMS       SignMethod = "GCP"

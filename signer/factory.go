@@ -22,6 +22,8 @@ func NewSigner(ctx context.Context, chainID uint64, cfg types.SignerConfig, name
 		cfg.Method = types.MethodLocal
 	}
 	switch cfg.Method {
+	case types.MethodNone:
+		res = &NoneSign{}
 	case types.MethodLocal:
 		specificCfg, err := NewLocalConfig(cfg)
 		if err != nil {
