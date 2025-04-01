@@ -36,10 +36,18 @@ build:
 test-unit:
 	trap '$(STOP)' EXIT; MallocNanoZone=0 go test -short -race -covermode=atomic -coverprofile=coverage_short.out  -coverpkg ./... -timeout 15m ./...
 
+.PHONY: test-docker-up
+test-docker-up:
+	cd test/e2e/ && docker compose  up -d && ./scripts/wait_docker_health.sh
+
+.PHONY: test-docker-down
+test-docker-down:
+	(cd test/e2e/; docker compose  down)
+
 .PHONY: test-e2e
-test-e2e:
+test-e2e: test-docker-up
 	trap '$(STOP)' EXIT; MallocNanoZone=0 go test -count=1 -race -p 1 -covermode=atomic -coverprofile=coverage.out  -coverpkg ./... -timeout 15m ./...
-	
+	make test-docker-down
 
 .PHONY: lint
 lint: ## Runs the linter

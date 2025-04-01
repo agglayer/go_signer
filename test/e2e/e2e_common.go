@@ -3,13 +3,10 @@ package e2e
 import (
 	"context"
 	"math/big"
-	"sync"
 	"testing"
-	"time"
 
 	"github.com/agglayer/go_signer/log"
 	signertypes "github.com/agglayer/go_signer/signer/types"
-	"github.com/agglayer/go_signer/test/e2e/helpers"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
 	"github.com/ethereum/go-ethereum/ethclient"
@@ -17,20 +14,9 @@ import (
 )
 
 const (
-
-	// dockerIsAlreadyRunning: set to true if you want to start manually the containers
-	// or you want to take advantage of previous run
-	dockerIsAlreadyRunning = false
-
-	gethURL                = "http://localhost:8545"
-	defaultChainID         = uint64(1337)
-	publicAddressTest      = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
-	sleepWaitDockerHealthy = 40 * time.Second
-)
-
-var (
-	mu         sync.Mutex
-	dockerIsUp = false
+	gethURL           = "http://localhost:8545"
+	defaultChainID    = uint64(1337)
+	publicAddressTest = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"
 )
 
 type e2eTestParams struct {
@@ -43,15 +29,7 @@ func testGenericSignerE2E(t *testing.T, params e2eTestParams) {
 	if testing.Short() {
 		t.Skip()
 	}
-	mu.Lock()
-	if !dockerIsUp && !dockerIsAlreadyRunning {
-		dockerCompose := helpers.NewDockerCompose()
-		dockerCompose.Down(t)
-		dockerCompose.Up(t)
-		dockerCompose.WaitHealthy(t, sleepWaitDockerHealthy)
-		dockerIsUp = true
-	}
-	mu.Unlock()
+
 	ctx := context.TODO()
 	ethClient, err := ethclient.Dial(gethURL)
 	require.NoError(t, err)
