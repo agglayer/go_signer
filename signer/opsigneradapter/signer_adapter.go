@@ -74,8 +74,7 @@ func (s *SignerAdapter) SignHash(ctx context.Context, hash common.Hash) ([]byte,
 }
 
 func (s *SignerAdapter) SignTx(ctx context.Context, tx *types.Transaction) (*types.Transaction, error) {
-	//txSigner := types.LatestSignerForChainID(tx.ChainId())
-	txSigner := types.HomesteadSigner{}
+	txSigner := types.LatestSignerForChainID(tx.ChainId())
 	digest := txSigner.Hash(tx)
 	signature, err := s.opSigner.SignDigest(ctx, s.keyName, digest.Bytes())
 	if err != nil {

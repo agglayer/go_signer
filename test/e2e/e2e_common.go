@@ -46,7 +46,7 @@ func checkSignatureAgainstReferenceLocalSigner(t *testing.T,
 	ctx context.Context,
 	hashToSign common.Hash, signature []byte) {
 	t.Helper()
-	localSigner, err := createLocalSigner(t, ctx, 1774)
+	localSigner, err := createLocalSigner(t, ctx, 0)
 	require.NoError(t, err)
 	localSign, ok := localSigner.(*signer.LocalSign)
 	require.True(t, ok)
@@ -79,7 +79,6 @@ func testGenericSignerE2E(t *testing.T, params e2eTestParams) {
 	} else {
 		require.Equal(t, publicAddressTest, sign.PublicAddress().String())
 	}
-	//testSendEthTx(t, sign.PublicAddress(), sign)
 	require.NoError(t, err)
 	hashToSign := common.Hash{}
 	signed, err := sign.SignHash(ctx, hashToSign)
@@ -91,6 +90,7 @@ func testGenericSignerE2E(t *testing.T, params e2eTestParams) {
 	} else {
 		require.Error(t, err)
 	}
+	testSendEthTx(t, sign.PublicAddress(), sign)
 }
 
 func testSendEthTx(t *testing.T, fromAddress common.Address, txSigner signertypes.TxSigner) {

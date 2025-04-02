@@ -112,14 +112,7 @@ func (e *RemoteSignerSign) Initialize(ctx context.Context) error {
 }
 
 func (e *RemoteSignerSign) SignHash(ctx context.Context, hash common.Hash) ([]byte, error) {
-	if !enableEIP155 {
-		return nil, fmt.Errorf("remote eth_sign use EIP155 that change the hash to sign. So you can't use to sign")
-	}
-	if e.address == zeroAddr {
-		return nil, fmt.Errorf("%s no Publicaddress set. Call Initialize first", e.logPrefix())
-	}
-
-	return e.client.SignHash(ctx, e.address, hash)
+	return nil, fmt.Errorf("remote eth_sign use EIP155 that change the hash to sign. So you can't use to sign")
 }
 
 func (e *RemoteSignerSign) SignTx(ctx context.Context, tx *types.Transaction) (*types.Transaction, error) {
