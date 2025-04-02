@@ -83,23 +83,18 @@ func (e *RemoteSignerClient) SignTx(ctx context.Context,
 	if tx.Data() != nil {
 		params["data"] = tx.Data()
 	}
-	// Fields maxPriorityFeePerGas and maxFeePerGas are not set
-
-	// https://docs.web3signer.consensys.io/reference/api/json-rpc#eth_signtransaction
+	// Fields maxPriorityFeePerGas and maxFeePerGas are not set because the API doesn't support them:
+	// - https://docs.web3signer.consensys.io/reference/api/json-rpc#eth_signtransaction
+	// - https://www.quicknode.com/docs/ethereum/eth_signTransaction
 	response, err := rpc.JSONRPCCallWithContext(ctx, e.url, "eth_signTransaction", params)
 	if err != nil {
 		return nil, fmt.Errorf("SignTx eth_signTransaction RPC call fails. Err: %w", err)
 	}
-	if err != nil {
-		return nil, err
-	}
-
 	if response.Error != nil {
 		return nil, fmt.Errorf("SignTx fails. Code:%v Message:%v", response.Error.Code, response.Error.Message)
 	}
 	var resultStr string
-	err = json.Unmarshal(response.Result, &resultStr)
-	if err != nil {
+	if err = json.Unmarshal(response.Result, &resultStr); err != nil {
 		return nil, fmt.Errorf("SignTx unmarshal fails. Err: %w", err)
 	}
 	log.Debugf("SignTx result: (%d) %s", len(resultStr), resultStr)

@@ -16,6 +16,8 @@ const (
 	FieldURL     = "url"
 )
 
+var zeroAddr common.Address
+
 type RemoteSignerClienter interface {
 	EthAccounts(ctx context.Context) ([]common.Address, error)
 	SignHash(ctx context.Context, address common.Address, hashToSign common.Hash) ([]byte, error)
@@ -91,7 +93,6 @@ func (e *RemoteSignerSign) Initialize(ctx context.Context) error {
 	if e.logger == nil {
 		return fmt.Errorf("%s logger is nil", e.logPrefix())
 	}
-	var zeroAddr common.Address
 	if e.address == zeroAddr {
 		accounts, err := e.client.EthAccounts(ctx)
 		if err != nil {
@@ -114,7 +115,6 @@ func (e *RemoteSignerSign) SignHash(ctx context.Context, hash common.Hash) ([]by
 	if !enableEIP155 {
 		return nil, fmt.Errorf("remote eth_sign use EIP155 that change the hash to sign. So you can't use to sign")
 	}
-	var zeroAddr common.Address
 	if e.address == zeroAddr {
 		return nil, fmt.Errorf("%s no Publicaddress set. Call Initialize first", e.logPrefix())
 	}

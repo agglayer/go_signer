@@ -15,11 +15,13 @@ var (
 
 func NewSigner(ctx context.Context, chainID uint64, cfg types.SignerConfig, name string,
 	logger signercommon.Logger) (types.Signer, error) {
-	var res types.Signer
-	var err error
+	var (
+		res types.Signer
+		err error
+	)
 	if cfg.Method == "" {
-		logger.Warnf("No signer method specified, defaulting to local (keystore file)")
-		cfg.Method = types.MethodLocal
+		logger.Warnf("No signer method specified, defaulting to None")
+		cfg.Method = types.MethodNone
 	}
 	switch cfg.Method {
 	case types.MethodNone:

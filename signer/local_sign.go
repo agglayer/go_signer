@@ -18,9 +18,6 @@ import (
 const (
 	FieldPath     = "path"
 	FieldPassword = "password"
-	// EIP155 is not enabled because the rest of user of this library
-	// expected that signing a hash doesn't add anything else.
-	enableEIP155 = false
 )
 
 // LocalSign is a signer that uses a local keystore file
@@ -146,18 +143,6 @@ func (e *LocalSign) initializeAuth() error {
 func (e *LocalSign) SignHash(ctx context.Context, hash common.Hash) ([]byte, error) {
 	if e.privateKey == nil {
 		return nil, fmt.Errorf("%s private key is nil", e.logPrefix())
-	}
-	if enableEIP155 {
-		// length of the hash is 32 bytes, so it's hardcoded
-		hashWithPrefix := crypto.Keccak256(append([]byte("\x19Ethereum Signed Message:\n32"), hash.Bytes()...))
-		sig, err := crypto.Sign(hashWithPrefix, e.privateKey)
-		if err != nil {
-			return nil, fmt.Errorf("%s can't sign hash. Err: %w", e.logPrefix(), err)
-		}
-		// Set r(recoveryID) as eth_sign that is 27 or 28
-		// crypto.Sign returns  0 or 1
-		sig[64] += 27
-		return sig, err
 	}
 	return crypto.Sign(hash.Bytes(), e.privateKey)
 }
