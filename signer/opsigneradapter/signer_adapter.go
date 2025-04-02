@@ -9,6 +9,7 @@ import (
 	opsignerprovider "github.com/ethereum-optimism/infra/op-signer/provider"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
+	"github.com/ethereum/go-ethereum/crypto"
 )
 
 type SignerAdapter struct {
@@ -56,7 +57,12 @@ func (s *SignerAdapter) PublicAddress() common.Address {
 	if err != nil {
 		return common.Address{}
 	}
-	return common.Address(res)
+	return convertPublicKeyToAddress(res)
+}
+
+func convertPublicKeyToAddress(publicKey []byte) common.Address {
+	addr := crypto.Keccak256(publicKey[1:])[12:]
+	return common.BytesToAddress(addr)
 }
 
 func (s *SignerAdapter) String() string {

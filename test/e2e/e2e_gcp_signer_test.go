@@ -15,6 +15,7 @@ func createGCPSigner(t *testing.T, ctx context.Context, chainID uint64) (signert
 	t.Helper()
 	KeyName := os.Getenv("GCP_KEY_NAME")
 	require.NotEmpty(t, KeyName, "required env var GCP_KEY_NAME")
+	log.Info("Creating GCP signer with key name: ", KeyName)
 	return signer.NewSigner(ctx, chainID, signertypes.SignerConfig{
 		Method: signertypes.MethodGCPKMS,
 		Config: map[string]interface{}{
@@ -24,7 +25,7 @@ func createGCPSigner(t *testing.T, ctx context.Context, chainID uint64) (signert
 }
 
 func TestGCPSigner(t *testing.T) {
-	t.Skip("It's not working yet")
+	//t.Skip("It's not working yet")
 	testGenericSignerE2E(t, e2eTestParams{
 		createSignerFunc: createGCPSigner,
 		canSign:          true,

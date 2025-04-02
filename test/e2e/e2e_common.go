@@ -20,8 +20,9 @@ const (
 )
 
 type e2eTestParams struct {
-	createSignerFunc func(t *testing.T, ctx context.Context, chainID uint64) (signertypes.Signer, error)
-	canSign          bool
+	createSignerFunc      func(t *testing.T, ctx context.Context, chainID uint64) (signertypes.Signer, error)
+	canSign               bool
+	expectedPublicAddress string
 }
 
 func testGenericSignerE2E(t *testing.T, params e2eTestParams) {
@@ -42,7 +43,11 @@ func testGenericSignerE2E(t *testing.T, params e2eTestParams) {
 
 	err = sign.Initialize(ctx)
 	require.NoError(t, err)
-	require.Equal(t, publicAddressTest, sign.PublicAddress().String())
+	if params.expectedPublicAddress != "" {
+		require.Equal(t, params.expectedPublicAddress, sign.PublicAddress().String())
+	} else {
+		require.Equal(t, publicAddressTest, sign.PublicAddress().String())
+	}
 
 	signed, err := sign.SignHash(ctx, common.Hash{})
 	if params.canSign {
