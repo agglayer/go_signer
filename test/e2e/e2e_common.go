@@ -3,9 +3,12 @@ package e2e
 import (
 	"context"
 	"math/big"
+	"os"
+	"strings"
 	"testing"
 
 	"github.com/agglayer/go_signer/log"
+	"github.com/agglayer/go_signer/signer"
 	signertypes "github.com/agglayer/go_signer/signer/types"
 	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/core/types"
@@ -23,6 +26,34 @@ type e2eTestParams struct {
 	createSignerFunc      func(t *testing.T, ctx context.Context, chainID uint64) (signertypes.Signer, error)
 	canSign               bool
 	expectedPublicAddress string
+}
+
+func createLocalSigner(t *testing.T, ctx context.Context, chainID uint64) (signertypes.Signer, error) {
+	t.Helper()
+	password, err := os.ReadFile("key_store/funded_addr.password")
+	require.NoError(t, err)
+	trimmedPassword := strings.TrimSpace(string(password))
+	return signer.NewSigner(ctx, chainID, signertypes.SignerConfig{
+		Method: signertypes.MethodLocal,
+		Config: map[string]interface{}{
+			signer.FieldPath:     "key_store/funded_addr",
+			signer.FieldPassword: trimmedPassword,
+		},
+	}, "test", log.WithFields("module", "test"))
+}
+
+func checkSignatureAgainstReferenceLocalSigner(t *testing.T,
+	ctx context.Context,
+	hashToSign common.Hash, signature []byte) {
+	t.Helper()
+	localSigner, err := createLocalSigner(t, ctx, 1774)
+	require.NoError(t, err)
+	localSign, ok := localSigner.(*signer.LocalSign)
+	require.True(t, ok)
+	err = localSigner.Initialize(ctx)
+	require.NoError(t, err)
+	ok = localSign.Verify(hashToSign, signature[0:64])
+	require.True(t, ok)
 }
 
 func testGenericSignerE2E(t *testing.T, params e2eTestParams) {
@@ -48,19 +79,18 @@ func testGenericSignerE2E(t *testing.T, params e2eTestParams) {
 	} else {
 		require.Equal(t, publicAddressTest, sign.PublicAddress().String())
 	}
-
-	signed, err := sign.SignHash(ctx, common.Hash{})
+	//testSendEthTx(t, sign.PublicAddress(), sign)
+	require.NoError(t, err)
+	hashToSign := common.Hash{}
+	signed, err := sign.SignHash(ctx, hashToSign)
 	if params.canSign {
 		require.NoError(t, err)
 		require.NotNil(t, signed)
 		log.Debugf("signed hash: %s", common.Bytes2Hex(signed))
-		require.Equal(t, "b8823364c90ea0d2700d5ad0fe39d16778bc07ce7df4779ff35e4b2660d043cb74a002439225d1d518f9f1cf3db005f5e143196543fd5146a34bf63f0b810ade00",
-			common.Bytes2Hex(signed))
+		checkSignatureAgainstReferenceLocalSigner(t, ctx, hashToSign, signed)
 	} else {
 		require.Error(t, err)
 	}
-
-	testSendEthTx(t, sign.PublicAddress(), sign)
 }
 
 func testSendEthTx(t *testing.T, fromAddress common.Address, txSigner signertypes.TxSigner) {

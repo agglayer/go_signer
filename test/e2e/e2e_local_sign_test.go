@@ -2,29 +2,31 @@ package e2e
 
 import (
 	"context"
-	"os"
-	"strings"
 	"testing"
 
-	"github.com/agglayer/go_signer/log"
 	"github.com/agglayer/go_signer/signer"
-	signertypes "github.com/agglayer/go_signer/signer/types"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/stretchr/testify/require"
 )
 
-func createLocalSigner(t *testing.T, ctx context.Context, chainID uint64) (signertypes.Signer, error) {
-	t.Helper()
-	password, err := os.ReadFile("key_store/funded_addr.password")
+func TestLocalHash(t *testing.T) {
+	ctx := context.TODO()
+	sut, err := createLocalSigner(t, ctx, 1774)
 	require.NoError(t, err)
-	trimmedPassword := strings.TrimSpace(string(password))
-	return signer.NewSigner(ctx, chainID, signertypes.SignerConfig{
-		Method: signertypes.MethodLocal,
-		Config: map[string]interface{}{
-			signer.FieldPath:     "key_store/funded_addr",
-			signer.FieldPassword: trimmedPassword,
-		},
-	}, "test", log.WithFields("module", "test"))
+	localSign, ok := sut.(*signer.LocalSign)
+	require.True(t, ok)
+	require.NoError(t, err)
+	err = sut.Initialize(ctx)
+	require.NoError(t, err)
+	hash := crypto.Keccak256Hash([]byte("test"))
+	signature, err := sut.SignHash(ctx, hash)
+	require.NoError(t, err)
+	require.NotNil(t, signature)
+	// we have to remove the last byte V
+	ok = localSign.Verify(hash, signature[0:64])
+	require.True(t, ok)
 }
+
 func TestLocalSigner(t *testing.T) {
 	testGenericSignerE2E(t, e2eTestParams{
 		createSignerFunc: createLocalSigner,

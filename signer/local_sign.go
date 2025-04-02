@@ -7,6 +7,7 @@ import (
 	"math/big"
 
 	signercommon "github.com/agglayer/go_signer/common"
+	"github.com/agglayer/go_signer/log"
 	signertypes "github.com/agglayer/go_signer/signer/types"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -159,6 +160,16 @@ func (e *LocalSign) SignHash(ctx context.Context, hash common.Hash) ([]byte, err
 		return sig, err
 	}
 	return crypto.Sign(hash.Bytes(), e.privateKey)
+}
+
+func (e *LocalSign) Verify(hash common.Hash, signature []byte) bool {
+	if e.privateKey == nil {
+		e.logger.Errorf("%s private key is nil", e.logPrefix())
+		return false
+	}
+	pub := crypto.FromECDSAPub(&e.privateKey.PublicKey)
+	log.Info("Pubkey: ", common.Bytes2Hex(pub))
+	return crypto.VerifySignature(pub, hash.Bytes(), signature)
 }
 
 func (e *LocalSign) PublicAddress() common.Address {
