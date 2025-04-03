@@ -7,7 +7,6 @@ import (
 	"math/big"
 
 	signercommon "github.com/agglayer/go_signer/common"
-	"github.com/agglayer/go_signer/log"
 	signertypes "github.com/agglayer/go_signer/signer/types"
 	"github.com/ethereum/go-ethereum/accounts/abi/bind"
 	"github.com/ethereum/go-ethereum/common"
@@ -148,20 +147,23 @@ func (e *LocalSign) SignHash(ctx context.Context, hash common.Hash) ([]byte, err
 	return crypto.Sign(hash.Bytes(), e.privateKey)
 }
 
-func (e *LocalSign) Verify(hash common.Hash, signature []byte) bool {
+// Verify a signature
+func (e *LocalSign) Verify(hash common.Hash, signature []byte) error {
 	if e.privateKey == nil {
-		e.logger.Errorf("%s. Err: %w", e.logPrefix(), ErrNoPrivateKey)
-		return false
+		return fmt.Errorf("%s. Err: %w", e.logPrefix(), ErrNoPrivateKey)
 	}
 	pub := crypto.FromECDSAPub(&e.privateKey.PublicKey)
-	log.Info("Pubkey: ", common.Bytes2Hex(pub))
 	// If signature is longer than 64 bytes, we need to trim it. Usually it is 65 bytes
 	// and the last byte is V (recovery id) that we don't need for verification.
 	// because VerifySignature expects "signature should have the 64 byte [R || S] format."
 	if len(signature) > 64 {
 		signature = signature[0:64]
 	}
-	return crypto.VerifySignature(pub, hash.Bytes(), signature)
+	ok := crypto.VerifySignature(pub, hash.Bytes(), signature)
+	if !ok {
+		return fmt.Errorf("%s verify signature failed. PubKey: %s", e.logPrefix(), common.Bytes2Hex(pub))
+	}
+	return nil
 }
 
 func (e *LocalSign) PublicAddress() common.Address {

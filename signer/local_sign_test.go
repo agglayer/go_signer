@@ -2,15 +2,13 @@ package signer
 
 import (
 	"context"
-	"crypto/ecdsa"
-	"crypto/elliptic"
-	"crypto/rand"
 	"testing"
 
 	signercommon "github.com/agglayer/go_signer/common"
 	"github.com/agglayer/go_signer/log"
 	signertypes "github.com/agglayer/go_signer/signer/types"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/stretchr/testify/require"
 )
 
@@ -51,9 +49,10 @@ func TestNewLocalSign(t *testing.T) {
 }
 
 func TestNewLocalSignFromPrivateKey(t *testing.T) {
-	privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	privateKey, err := crypto.GenerateKey()
 	require.NoError(t, err)
-	sut := NewLocalSignFromPrivateKey("name", nil, privateKey)
+	logger := log.WithFields("test", "test")
+	sut := NewLocalSignFromPrivateKey("name", logger, privateKey)
 	require.NotNil(t, sut)
 	ctx := context.TODO()
 	err = sut.Initialize(ctx)
@@ -63,11 +62,13 @@ func TestNewLocalSignFromPrivateKey(t *testing.T) {
 	t.Log("pubAddr: ", pubAddr.String())
 	str := sut.String()
 	require.NotEmpty(t, str)
-	hashToSign := common.Hash{}
+	//hashToSign := common.Hash{}
+	hashToSign := crypto.Keccak256Hash([]byte("test"))
 	signature, err := sut.SignHash(ctx, hashToSign)
 	require.NoError(t, err)
-	signOk := sut.Verify(hashToSign, signature[0:64])
-	require.True(t, signOk)
+	require.NotNil(t, signature)
+	err = sut.Verify(hashToSign, signature)
+	require.NoError(t, err)
 }
 
 func TestNewLocalSignEmpty(t *testing.T) {

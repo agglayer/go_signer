@@ -22,9 +22,8 @@ func TestLocalHash(t *testing.T) {
 	signature, err := sut.SignHash(ctx, hash)
 	require.NoError(t, err)
 	require.NotNil(t, signature)
-	// we have to remove the last byte V
-	ok = localSign.Verify(hash, signature[0:64])
-	require.True(t, ok)
+	err = localSign.Verify(hash, signature)
+	require.NoError(t, err)
 }
 
 func TestLocalSigner(t *testing.T) {
