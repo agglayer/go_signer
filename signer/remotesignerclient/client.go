@@ -89,8 +89,7 @@ func (e *RemoteSignerClient) SignTx(ctx context.Context,
 		params["data"] = tx.Data()
 	}
 	// Fields maxPriorityFeePerGas and maxFeePerGas are not set because the API doesn't support them:
-	// - https://docs.web3signer.consensys.io/reference/api/json-rpc#eth_signtransaction
-	// - https://www.quicknode.com/docs/ethereum/eth_signTransaction
+	// - https://ethereum.org/en/developers/docs/apis/json-rpc/#eth_signtransaction
 	response, err := rpc.JSONRPCCallWithContext(ctx, e.url, "eth_signTransaction", params)
 	if err != nil {
 		return nil, fmt.Errorf("SignTx eth_signTransaction RPC call fails. Err: %w", err)
