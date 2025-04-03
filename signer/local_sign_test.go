@@ -62,7 +62,6 @@ func TestNewLocalSignFromPrivateKey(t *testing.T) {
 	t.Log("pubAddr: ", pubAddr.String())
 	str := sut.String()
 	require.NotEmpty(t, str)
-	//hashToSign := common.Hash{}
 	hashToSign := crypto.Keccak256Hash([]byte("test"))
 	signature, err := sut.SignHash(ctx, hashToSign)
 	require.NoError(t, err)

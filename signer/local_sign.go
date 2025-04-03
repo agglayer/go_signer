@@ -17,6 +17,9 @@ import (
 const (
 	FieldPath     = "path"
 	FieldPassword = "password"
+	// expectedLengthSignatureToSign is the expected length that VerifySignature expects
+	// signature should have the 64 byte [R || S] format. (so without V)
+	expectedLengthSignatureToVerify = 64
 )
 
 var (
@@ -156,8 +159,8 @@ func (e *LocalSign) Verify(hash common.Hash, signature []byte) error {
 	// If signature is longer than 64 bytes, we need to trim it. Usually it is 65 bytes
 	// and the last byte is V (recovery id) that we don't need for verification.
 	// because VerifySignature expects "signature should have the 64 byte [R || S] format."
-	if len(signature) > 64 {
-		signature = signature[0:64]
+	if len(signature) > expectedLengthSignatureToVerify {
+		signature = signature[0:expectedLengthSignatureToVerify]
 	}
 	ok := crypto.VerifySignature(pub, hash.Bytes(), signature)
 	if !ok {
