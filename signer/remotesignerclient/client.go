@@ -12,16 +12,19 @@ import (
 	"github.com/ethereum/go-ethereum/rlp"
 )
 
+// RemoteSignerClient is a client for a remote signer (eth_sign and eth_signTransaction)
 type RemoteSignerClient struct {
 	url string
 }
 
+// NewRemoteSignerClient creates a new RemoteSignerClient
 func NewRemoteSignerClient(url string) *RemoteSignerClient {
 	return &RemoteSignerClient{
 		url: url,
 	}
 }
 
+// EthAccounts returns the list of accounts from the remote signer
 func (e *RemoteSignerClient) EthAccounts(ctx context.Context) ([]common.Address, error) {
 	response, err := rpc.JSONRPCCallWithContext(ctx, e.url, "eth_accounts")
 	if err != nil {
@@ -40,6 +43,7 @@ func (e *RemoteSignerClient) EthAccounts(ctx context.Context) ([]common.Address,
 	return result, nil
 }
 
+// SignHash signs a hash with the remote signer
 func (e *RemoteSignerClient) SignHash(ctx context.Context,
 	address common.Address,
 	hashToSign common.Hash) ([]byte, error) {
@@ -61,6 +65,7 @@ func (e *RemoteSignerClient) SignHash(ctx context.Context,
 	return result, nil
 }
 
+// SignTx signs a transaction with the remote signer
 func (e *RemoteSignerClient) SignTx(ctx context.Context,
 	from common.Address, tx *types.Transaction) (*types.Transaction, error) {
 	params := map[string]interface{}{

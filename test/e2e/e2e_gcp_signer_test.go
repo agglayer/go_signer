@@ -25,7 +25,7 @@ func createGCPSigner(t *testing.T, ctx context.Context, chainID uint64) (signert
 }
 
 func TestGCPSigner(t *testing.T) {
-	t.Skip("It's not working yet")
+	//t.Skip("It's not working yet")
 	testGenericSignerE2E(t, e2eTestParams{
 		createSignerFunc: createGCPSigner,
 		canSign:          true,

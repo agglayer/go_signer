@@ -54,6 +54,11 @@ func checkSignatureAgainstReferenceLocalSigner(t *testing.T,
 	require.NoError(t, err)
 	ok = localSign.Verify(hashToSign, signature[0:64])
 	require.True(t, ok)
+	t.Log("signature: ", common.Bytes2Hex(signature))
+	t.Log("signature length: ", len(signature))
+	t.Log("signature without V: ", common.Bytes2Hex(signature[0:64]))
+	t.Log("signature V: ", signature[64])
+	t.Log("✔️ signature Verified!")
 }
 
 func testGenericSignerE2E(t *testing.T, params e2eTestParams) {

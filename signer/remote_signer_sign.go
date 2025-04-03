@@ -56,7 +56,7 @@ func NewRemoteSignerConfig(cfg signertypes.SignerConfig) (RemoteSignerConfig, er
 	urlStr, ok := urlIntf.(string)
 	if !ok {
 		return RemoteSignerConfig{}, fmt.Errorf("config %s: field %s is not string %v",
-			signertypes.MethodRemoteSigner, FieldURL, cfg.Config["url"])
+			signertypes.MethodRemoteSigner, FieldURL, urlIntf)
 	}
 	return RemoteSignerConfig{
 		URL:     urlStr,
@@ -112,7 +112,7 @@ func (e *RemoteSignerSign) Initialize(ctx context.Context) error {
 }
 
 func (e *RemoteSignerSign) SignHash(ctx context.Context, hash common.Hash) ([]byte, error) {
-	return nil, fmt.Errorf("remote eth_sign use EIP155 that change the hash to sign. So you can't use to sign")
+	return nil, fmt.Errorf("remote eth_sign use EIP155 that changed the hash to sign. So you can't use this signers")
 }
 
 func (e *RemoteSignerSign) SignTx(ctx context.Context, tx *types.Transaction) (*types.Transaction, error) {

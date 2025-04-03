@@ -55,16 +55,18 @@ func TestNewLocalSignFromPrivateKey(t *testing.T) {
 	require.NoError(t, err)
 	sut := NewLocalSignFromPrivateKey("name", nil, privateKey)
 	require.NotNil(t, sut)
-	err = sut.Initialize(context.Background())
+	ctx := context.TODO()
+	err = sut.Initialize(ctx)
 	require.NoError(t, err)
 	pubAddr := sut.PublicAddress()
 	require.NotNil(t, pubAddr)
 	t.Log("pubAddr: ", pubAddr.String())
 	str := sut.String()
 	require.NotEmpty(t, str)
-	signature, err := sut.SignHash(context.Background(), common.Hash{})
+	hashToSign := common.Hash{}
+	signature, err := sut.SignHash(ctx, hashToSign)
 	require.NoError(t, err)
-	signOk := sut.Verify(common.Hash{}, signature)
+	signOk := sut.Verify(hashToSign, signature[0:64])
 	require.True(t, signOk)
 }
 

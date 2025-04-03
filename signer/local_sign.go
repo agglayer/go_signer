@@ -20,6 +20,10 @@ const (
 	FieldPassword = "password"
 )
 
+var (
+	ErrNoPrivateKey = fmt.Errorf("private key is nil")
+)
+
 // LocalSign is a signer that uses a local keystore file
 type LocalSign struct {
 	name          string
@@ -114,10 +118,7 @@ func (e *LocalSign) initializeKey() error {
 		return fmt.Errorf("%s initializeKey fails. Err: %w", e.logPrefix(), err)
 	}
 	if privateKey == nil {
-		// If the private key is nil, the address is also nil
-		// we allow to have a nil private key, it will fail if try to use it
-		e.logger.Warnf("%s private key is nil", e.logPrefix())
-		return nil
+		return fmt.Errorf("%s. Err: %w", e.logPrefix(), ErrNoPrivateKey)
 	}
 	e.privateKey = privateKey
 	e.publicAddress = crypto.PubkeyToAddress(privateKey.PublicKey)
@@ -142,18 +143,24 @@ func (e *LocalSign) initializeAuth() error {
 // SignHash signs a hash
 func (e *LocalSign) SignHash(ctx context.Context, hash common.Hash) ([]byte, error) {
 	if e.privateKey == nil {
-		return nil, fmt.Errorf("%s private key is nil", e.logPrefix())
+		return nil, fmt.Errorf("%s. Err: %w", e.logPrefix(), ErrNoPrivateKey)
 	}
 	return crypto.Sign(hash.Bytes(), e.privateKey)
 }
 
 func (e *LocalSign) Verify(hash common.Hash, signature []byte) bool {
 	if e.privateKey == nil {
-		e.logger.Errorf("%s private key is nil", e.logPrefix())
+		e.logger.Errorf("%s. Err: %w", e.logPrefix(), ErrNoPrivateKey)
 		return false
 	}
 	pub := crypto.FromECDSAPub(&e.privateKey.PublicKey)
 	log.Info("Pubkey: ", common.Bytes2Hex(pub))
+	// If signature is longer than 64 bytes, we need to trim it. Usually it is 65 bytes
+	// and the last byte is V (recovery id) that we don't need for verification.
+	// because VerifySignature expects "signature should have the 64 byte [R || S] format."
+	if len(signature) > 64 {
+		signature = signature[0:64]
+	}
 	return crypto.VerifySignature(pub, hash.Bytes(), signature)
 }
 
