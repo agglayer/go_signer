@@ -23,7 +23,8 @@ type SignerAdapter struct {
 
 var _ gosignertypes.Signer = (*SignerAdapter)(nil)
 
-func NewSignerAdapter(ctx context.Context, logger signercommon.Logger, opSigner opsignerprovider.SignatureProvider, keyName string, chainID uint64) *SignerAdapter {
+func NewSignerAdapter(ctx context.Context, logger signercommon.Logger, opSigner opsignerprovider.SignatureProvider,
+	keyName string, chainID uint64) *SignerAdapter {
 	return &SignerAdapter{
 		opSigner: opSigner,
 		ctx:      ctx,
@@ -79,7 +80,6 @@ func (s *SignerAdapter) SignHash(ctx context.Context, hash common.Hash) ([]byte,
 }
 
 func (s *SignerAdapter) SignTx(ctx context.Context, tx *types.Transaction) (*types.Transaction, error) {
-
 	chainID := big.NewInt(int64(s.chainID))
 	txSigner := types.LatestSignerForChainID(chainID)
 	digest := txSigner.Hash(tx)
