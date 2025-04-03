@@ -74,7 +74,7 @@ func TestNewLocalSignEmpty(t *testing.T) {
 	logger := log.WithFields("test", "test")
 	sut := NewLocalSign("name", logger, signercommon.KeystoreFileConfig{}, 0)
 	err := sut.Initialize(context.Background())
-	require.NoError(t, err)
+	require.Error(t, err)
 	pubAddr := sut.PublicAddress()
 	require.Equal(t, common.Address{}, pubAddr)
 	_, err = sut.SignHash(context.Background(), common.Hash{})
