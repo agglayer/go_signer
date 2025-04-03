@@ -1,16 +1,11 @@
-name: Test Unit and SonarCloud analysis
-
-on:
-  push:
-    branches:
-      - main
-      - develop
-      - 'release/**'
-  pull_request:
-  workflow_dispatch: {}
-
+name: Test E2E
+on: 
+    push:
+      branches:
+        - '**'
+    workflow_dispatch: {}
 jobs:
-  test-unit:
+  test-e2e:
     strategy:
       fail-fast: false
       matrix:
@@ -31,4 +26,11 @@ jobs:
           GOARCH: ${{ matrix.goarch }}
 
       - name: Test
-        run: make test-unit
+        run: make test-e2e
+
+      # Error: You are running CI analysis while Automatic Analysis is enabled. Please consider disabling one or the other.
+      # - name: SonarQube Scan
+      #   uses: SonarSource/sonarqube-scan-action@v4.2.1
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}

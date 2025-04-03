@@ -2,21 +2,20 @@ package signer
 
 import (
 	"context"
-	"crypto/ecdsa"
-	"crypto/elliptic"
-	"crypto/rand"
 	"testing"
 
 	signercommon "github.com/agglayer/go_signer/common"
 	"github.com/agglayer/go_signer/log"
+	signertypes "github.com/agglayer/go_signer/signer/types"
 	"github.com/ethereum/go-ethereum/common"
+	"github.com/ethereum/go-ethereum/crypto"
 	"github.com/stretchr/testify/require"
 )
 
 // To keep compatibility with previous version, an empty config file
 // meant there is no privateKey (nil), so the idea is keep the same behavior
 func TestNewKeyStoreFileConfigEmpty(t *testing.T) {
-	cfg, err := NewLocalConfig(SignerConfig{})
+	cfg, err := NewLocalConfig(signertypes.SignerConfig{})
 	require.NoError(t, err)
 	require.Equal(t, "", cfg.Path)
 	require.Equal(t, "", cfg.Password)
@@ -24,7 +23,7 @@ func TestNewKeyStoreFileConfigEmpty(t *testing.T) {
 
 func TestNewLocalSignerConfig(t *testing.T) {
 	cfg := NewLocalSignerConfig("/app/sequencer.keystore", "test")
-	require.Equal(t, MethodLocal, cfg.Method)
+	require.Equal(t, signertypes.MethodLocal, cfg.Method)
 	require.Equal(t, "/app/sequencer.keystore", cfg.Config[FieldPath])
 	require.Equal(t, "test", cfg.Config[FieldPassword])
 
@@ -42,7 +41,7 @@ func TestNewLocalSignerConfigWrongData(t *testing.T) {
 }
 
 func TestNewLocalSign(t *testing.T) {
-	sut := NewLocalSign("name", nil, signercommon.KeystoreFileConfig{})
+	sut := NewLocalSign("name", nil, signercommon.KeystoreFileConfig{}, 0)
 	require.NotNil(t, sut)
 	require.Equal(t, "name", sut.name)
 	require.Nil(t, sut.logger)
@@ -50,25 +49,32 @@ func TestNewLocalSign(t *testing.T) {
 }
 
 func TestNewLocalSignFromPrivateKey(t *testing.T) {
-	privateKey, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
+	privateKey, err := crypto.GenerateKey()
 	require.NoError(t, err)
-	sut := NewLocalSignFromPrivateKey("name", nil, privateKey)
+	logger := log.WithFields("test", "test")
+	sut := NewLocalSignFromPrivateKey("name", logger, privateKey)
 	require.NotNil(t, sut)
-	err = sut.Initialize(context.Background())
+	ctx := context.TODO()
+	err = sut.Initialize(ctx)
 	require.NoError(t, err)
 	pubAddr := sut.PublicAddress()
 	require.NotNil(t, pubAddr)
+	t.Log("pubAddr: ", pubAddr.String())
 	str := sut.String()
 	require.NotEmpty(t, str)
-	_, err = sut.SignHash(context.Background(), common.Hash{})
+	hashToSign := crypto.Keccak256Hash([]byte("test"))
+	signature, err := sut.SignHash(ctx, hashToSign)
+	require.NoError(t, err)
+	require.NotNil(t, signature)
+	err = sut.Verify(hashToSign, signature)
 	require.NoError(t, err)
 }
 
 func TestNewLocalSignEmpty(t *testing.T) {
 	logger := log.WithFields("test", "test")
-	sut := NewLocalSign("name", logger, signercommon.KeystoreFileConfig{})
+	sut := NewLocalSign("name", logger, signercommon.KeystoreFileConfig{}, 0)
 	err := sut.Initialize(context.Background())
-	require.NoError(t, err)
+	require.Error(t, err)
 	pubAddr := sut.PublicAddress()
 	require.Equal(t, common.Address{}, pubAddr)
 	_, err = sut.SignHash(context.Background(), common.Hash{})

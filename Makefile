@@ -10,8 +10,6 @@ endif
 GOBASE := $(shell pwd)
 GOBIN := $(GOBASE)/target
 GOENVVARS := GOBIN=$(GOBIN) CGO_ENABLED=1 GOARCH=$(ARCH)
-GOBINARY := signer
-GOCMD := $(GOBASE)/cmd
 
 
 # Check dependencies
@@ -25,18 +23,44 @@ check-go:
 build: check-go
 lint: check-go
 
-.PHONY: build-signer
-build-signer:
-	$(GOENVVARS) go build -ldflags "all=$(LDFLAGS)" -o $(GOBIN)/$(GOBINARY) $(GOCMD)
+.PHONY: clean
+clean:
+	rm -rf $(GOBIN)/*
+
+
+.PHONY: build
+build:
+	$(GOENVVARS) go build -ldflags "all=$(LDFLAGS)" -o $(GOBIN)/cmdline_signer test/cmdline_signer/main.go
 	
 .PHONY: test-unit
 test-unit:
-	trap '$(STOP)' EXIT; MallocNanoZone=0 go test -count=1 -short -race -p 1 -covermode=atomic -coverprofile=coverage.out  -coverpkg ./... -timeout 15m ./...
-	
+	trap '$(STOP)' EXIT; MallocNanoZone=0 go test -short -race -covermode=atomic -coverprofile=coverage_short.out  -coverpkg ./... -timeout 15m ./...
+
+.PHONY: test-docker-up
+test-docker-up:
+	cd test/e2e/ && docker compose  up -d && ./scripts/wait_docker_health.sh
+
+.PHONY: test-docker-down
+test-docker-down:
+	(cd test/e2e/; docker compose  down)
+
+.PHONY: test-e2e
+test-e2e: test-docker-up
+	trap '$(STOP)' EXIT; MallocNanoZone=0 go test -count=1 -race -p 1 -covermode=atomic -coverprofile=coverage.out  -coverpkg ./... -timeout 15m ./...
+	make test-docker-down
+
 .PHONY: lint
 lint: ## Runs the linter
 	export "GOROOT=$$(go env GOROOT)" && $$(go env GOPATH)/bin/golangci-lint run --timeout 5m
 
+.PHONY: check-is-new-version
+check-is-new-version: ## Checks if the version is new or already exists
+	@export VERSION=$$(go run ./cmd/ --version  | cut -f 3 -d ' ') ; \
+	echo "current version: $$VERSION" ; \
+	if [ -z "$$VERSION" ]; then echo "Error: Version is empty" && exit 1; fi ; \
+	git tag -l $$VERSION | grep $$VERSION  ; \
+	if [ $$? -eq 0 ]; then echo "Error: Version already exists"; exit 1; fi ; \
+	echo "Version is new"
 
 COMMON_MOCKERY_PARAMS=--disable-version-string --with-expecter --exported
 
