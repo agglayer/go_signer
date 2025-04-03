@@ -102,10 +102,10 @@ func NewLocalSignFromPrivateKey(name string,
 // Initialize initializes the LocalSign, read key if needed
 func (e *LocalSign) Initialize(ctx context.Context) error {
 	if err := e.initializeKey(); err != nil {
-		return fmt.Errorf("%s failed to initialize key: %w", e.logPrefix(), err)
+		return fmt.Errorf("%s Initialize failed key: %w", e.logPrefix(), err)
 	}
 	if err := e.initializeAuth(); err != nil {
-		return fmt.Errorf("%s failed to initialize auth: %w", e.logPrefix(), err)
+		return fmt.Errorf("%s Initialize failed auth: %w", e.logPrefix(), err)
 	}
 	return nil
 }
@@ -120,7 +120,7 @@ func (e *LocalSign) initializeKey() error {
 		return fmt.Errorf("%s initializeKey fails. Err: %w", e.logPrefix(), err)
 	}
 	if privateKey == nil {
-		return fmt.Errorf("%s. Err: %w", e.logPrefix(), ErrNoPrivateKey)
+		return fmt.Errorf("%s initializeKey. Err: %w", e.logPrefix(), ErrNoPrivateKey)
 	}
 	e.privateKey = privateKey
 	e.publicAddress = crypto.PubkeyToAddress(privateKey.PublicKey)
@@ -132,11 +132,11 @@ func (e *LocalSign) initializeAuth() error {
 		return nil
 	}
 	if e.privateKey == nil {
-		return nil
+		return fmt.Errorf("%s initializeAuth. Err: %w", e.logPrefix(), ErrNoPrivateKey)
 	}
 	auth, err := bind.NewKeyedTransactorWithChainID(e.privateKey, new(big.Int).SetUint64(e.chainID))
 	if err != nil {
-		return fmt.Errorf("%s can't initialize auth. Err: %w", e.logPrefix(), err)
+		return fmt.Errorf("%s initializeAuth. can't initialize auth. Err: %w", e.logPrefix(), err)
 	}
 	e.auth = auth
 	return nil
@@ -145,7 +145,7 @@ func (e *LocalSign) initializeAuth() error {
 // SignHash signs a hash
 func (e *LocalSign) SignHash(ctx context.Context, hash common.Hash) ([]byte, error) {
 	if e.privateKey == nil {
-		return nil, fmt.Errorf("%s. Err: %w", e.logPrefix(), ErrNoPrivateKey)
+		return nil, fmt.Errorf("%s SignHash  Err: %w", e.logPrefix(), ErrNoPrivateKey)
 	}
 	return crypto.Sign(hash.Bytes(), e.privateKey)
 }
@@ -153,7 +153,7 @@ func (e *LocalSign) SignHash(ctx context.Context, hash common.Hash) ([]byte, err
 // Verify a signature
 func (e *LocalSign) Verify(hash common.Hash, signature []byte) error {
 	if e.privateKey == nil {
-		return fmt.Errorf("%s. Err: %w", e.logPrefix(), ErrNoPrivateKey)
+		return fmt.Errorf("%s Verify Err: %w", e.logPrefix(), ErrNoPrivateKey)
 	}
 	pub := crypto.FromECDSAPub(&e.privateKey.PublicKey)
 	// If signature is longer than 64 bytes, we need to trim it. Usually it is 65 bytes
