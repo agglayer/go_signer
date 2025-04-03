@@ -3,6 +3,7 @@ package opsigneradapter
 import (
 	"context"
 	"fmt"
+	"math/big"
 
 	signercommon "github.com/agglayer/go_signer/common"
 	gosignertypes "github.com/agglayer/go_signer/signer/types"
@@ -15,21 +16,25 @@ import (
 type SignerAdapter struct {
 	opSigner opsignerprovider.SignatureProvider
 	ctx      context.Context
+	logger   signercommon.Logger
 	keyName  string
+	chainID  uint64
 }
 
 var _ gosignertypes.Signer = (*SignerAdapter)(nil)
 
-func NewSignerAdapter(ctx context.Context, opSigner opsignerprovider.SignatureProvider, keyName string) *SignerAdapter {
+func NewSignerAdapter(ctx context.Context, logger signercommon.Logger, opSigner opsignerprovider.SignatureProvider, keyName string, chainID uint64) *SignerAdapter {
 	return &SignerAdapter{
 		opSigner: opSigner,
 		ctx:      ctx,
+		logger:   logger,
 		keyName:  keyName,
+		chainID:  chainID,
 	}
 }
 
 func NewSignerAdapterFromConfig(ctx context.Context, logger signercommon.Logger,
-	cfg gosignertypes.SignerConfig) (*SignerAdapter, error) {
+	cfg gosignertypes.SignerConfig, chainID uint64) (*SignerAdapter, error) {
 	opConfig := opsignerprovider.ProviderConfig{
 		ProviderType: opsignerprovider.ProviderType(cfg.Method),
 	}
@@ -41,7 +46,7 @@ func NewSignerAdapterFromConfig(ctx context.Context, logger signercommon.Logger,
 	if err != nil {
 		return nil, fmt.Errorf("error getting keyName from config. Err: %w", err)
 	}
-	return NewSignerAdapter(ctx, opSigner, keyName), nil
+	return NewSignerAdapter(ctx, logger, opSigner, keyName, chainID), nil
 }
 
 func (s *SignerAdapter) Initialize(context.Context) error {
@@ -74,8 +79,11 @@ func (s *SignerAdapter) SignHash(ctx context.Context, hash common.Hash) ([]byte,
 }
 
 func (s *SignerAdapter) SignTx(ctx context.Context, tx *types.Transaction) (*types.Transaction, error) {
-	txSigner := types.LatestSignerForChainID(tx.ChainId())
+
+	chainID := big.NewInt(int64(s.chainID))
+	txSigner := types.LatestSignerForChainID(chainID)
 	digest := txSigner.Hash(tx)
+	s.logger.Debugf("SignTx %s. chainID: %d", digest.String(), s.chainID)
 	signature, err := s.opSigner.SignDigest(ctx, s.keyName, digest.Bytes())
 	if err != nil {
 		return nil, fmt.Errorf("error signTx opSigner.SignDigest. Err: %w ", err)

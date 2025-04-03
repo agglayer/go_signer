@@ -95,28 +95,28 @@ func testGenericSignerE2E(t *testing.T, params e2eTestParams) {
 	} else {
 		require.Error(t, err)
 	}
-	testSendEthTx(t, sign.PublicAddress(), sign)
+	testSendEthTx(t, context.TODO(), sign.PublicAddress(), sign)
 }
 
-func testSendEthTx(t *testing.T, fromAddress common.Address, txSigner signertypes.TxSigner) {
+func testSendEthTx(t *testing.T, ctx context.Context, fromAddress common.Address, txSigner signertypes.TxSigner) {
 	t.Helper()
 	client, err := ethclient.Dial(gethURL)
 	require.NoError(t, err)
 	defer client.Close()
 	toAddress := common.HexToAddress("0x1234567890ABCDEF1234567890ABCDEF12345678")
-	nonce, err := client.PendingNonceAt(context.Background(), fromAddress)
+	nonce, err := client.PendingNonceAt(ctx, fromAddress)
 	require.NoError(t, err)
 	// 0.0001 ETH en wei = 0.0001 * 10^18 = 100,000,000,000,000 (1e14)
 	value := big.NewInt(1e14) //nolint:mnd
 	gasLimit := uint64(21000) //nolint:mnd
-	gasPrice, err := client.SuggestGasPrice(context.Background())
+	gasPrice, err := client.SuggestGasPrice(ctx)
 	require.NoError(t, err)
 	tx := types.NewTransaction(nonce, toAddress, value, gasLimit, gasPrice, nil)
-	signedTx, err := txSigner.SignTx(context.Background(), tx)
+	signedTx, err := txSigner.SignTx(ctx, tx)
 	require.NoError(t, err)
-	err = client.SendTransaction(context.Background(), signedTx)
+	err = client.SendTransaction(ctx, signedTx)
 	require.NoError(t, err)
-	balance, err := client.BalanceAt(context.Background(), fromAddress, nil)
+	balance, err := client.BalanceAt(ctx, fromAddress, nil)
 	require.NoError(t, err)
 	log.Infof("balance: %s", balance.String())
 }

@@ -39,7 +39,7 @@ func NewSigner(ctx context.Context, chainID uint64, cfg types.SignerConfig, name
 		}
 		res = NewRemoteSignerSignFromConfig(name, logger, specificCfg)
 	case types.MethodGCPKMS:
-		res, err = opsigneradapter.NewSignerAdapterFromConfig(ctx, logger, cfg)
+		res, err = opsigneradapter.NewSignerAdapterFromConfig(ctx, logger, cfg, chainID)
 		if err != nil {
 			return nil, err
 		}
