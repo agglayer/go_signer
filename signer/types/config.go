@@ -1,6 +1,9 @@
 package types
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 type SignMethod string
 
@@ -31,7 +34,10 @@ type SignerConfig struct {
 func (c SignerConfig) Get(key string) (string, error) {
 	v, ok := c.Config[key]
 	if !ok {
-		return "", fmt.Errorf("key %s not found", key)
+		v, ok = c.Config[strings.ToLower(key)]
+		if !ok {
+			return "", fmt.Errorf("key %s not found", key)
+		}
 	}
 	s, ok := v.(string)
 	if !ok {

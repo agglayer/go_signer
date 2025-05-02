@@ -13,6 +13,10 @@ import (
 	"github.com/ethereum/go-ethereum/crypto"
 )
 
+const (
+	FieldKeyName = "KeyName"
+)
+
 type SignerAdapter struct {
 	opSigner opsignerprovider.SignatureProvider
 	ctx      context.Context
@@ -43,7 +47,7 @@ func NewSignerAdapterFromConfig(ctx context.Context, logger signercommon.Logger,
 	if err != nil {
 		return nil, fmt.Errorf("error creating opSignerProvider. Err: %w", err)
 	}
-	keyName, err := cfg.Get("KeyName")
+	keyName, err := cfg.Get(FieldKeyName)
 	if err != nil {
 		return nil, fmt.Errorf("error getting keyName from config. Err: %w", err)
 	}
