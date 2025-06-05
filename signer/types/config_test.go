@@ -77,3 +77,25 @@ func TestUnmarshalEmptyConfig(t *testing.T) {
 	require.Equal(t, "", cfg.Signer.Method.String())
 	require.Equal(t, 0, len(cfg.Signer.Config))
 }
+
+func TestSignerConfigString(t *testing.T) {
+	cfg := SignerConfig{
+		Method: MethodLocal,
+		Config: map[string]any{
+			"Path":     "/app/sequencer.keystore",
+			"Password": "test",
+		},
+	}
+	expected := "Method: local\n  Path: /app/sequencer.keystore\n  Password: test\n"
+	require.Equal(t, expected, cfg.String())
+
+	cfg = SignerConfig{
+		Method: MethodRemoteSigner,
+		Config: map[string]any{
+			"URL":     "http://localhost:8545",
+			"Address": "0x1234567890abcdef",
+		},
+	}
+	expected = "Method: remote\n  URL: http://localhost:8545\n  Address: 0x1234567890abcdef\n"
+	require.Equal(t, expected, cfg.String())
+}

@@ -12,6 +12,7 @@ var (
 	MethodLocal        SignMethod = "local"
 	MethodRemoteSigner SignMethod = "remote"
 	MethodGCPKMS       SignMethod = "GCP"
+	MethodAWSKMS       SignMethod = "AWS"
 )
 
 func (m SignMethod) String() string {
@@ -44,4 +45,13 @@ func (c SignerConfig) Get(key string) (string, error) {
 		return "", fmt.Errorf("key %s is not a string", key)
 	}
 	return s, nil
+}
+
+func (c SignerConfig) String() string {
+	var sb strings.Builder
+	sb.WriteString(fmt.Sprintf("Method: %s\n", c.Method))
+	for k, v := range c.Config {
+		sb.WriteString(fmt.Sprintf("  %s: %v\n", k, v))
+	}
+	return sb.String()
 }

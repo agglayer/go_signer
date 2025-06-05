@@ -5,6 +5,7 @@ Library for support multiples method to sign
 This library supports 3 types of signing methods: 
 - **local**: it's a private key file
 - **GCP**: google cloud KMS
+- **AWS**: AWS KMS
 - **remote**: it's a call to a remote signer service that implements [remote signing APIs](https://github.com/ethereum/remote-signing-api?tab=readme-ov-file) as [web_3signer](https://docs.web3signer.consensys.io/) **only support sign transactions**
 
 There are a `None` method just for develop propouses
@@ -31,6 +32,12 @@ KeyName ="projects/your-prj-name/locations/your_location/keyRings/name_of_your_k
 ```
 You can copy `KeyName` from console > Security > Key Managent 
 Or executing `gcloud kms inventory list-keys`
+
+### Configuration AWS method
+The object `SignerConfig` needs next fields:
+- `SignerConfig.Method` : `AWS`  (you can use const `MethodAWSKMS`)
+- `SignerConfig.Config["KeyName"]`: Full path to key resource with version
+
 
 ### Configuration remote method
 #### Generic configuration
