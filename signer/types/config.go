@@ -2,6 +2,7 @@ package types
 
 import (
 	"fmt"
+	"sort"
 	"strings"
 )
 
@@ -50,8 +51,13 @@ func (c SignerConfig) Get(key string) (string, error) {
 func (c SignerConfig) String() string {
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf("Method: %s\n", c.Method))
-	for k, v := range c.Config {
-		sb.WriteString(fmt.Sprintf("  %s: %v\n", k, v))
+	keys := make([]string, 0, len(c.Config))
+	for k := range c.Config {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+	for _, k := range keys {
+		sb.WriteString(fmt.Sprintf(" Config[%s]: %v\n", k, c.Config[k]))
 	}
 	return sb.String()
 }

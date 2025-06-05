@@ -5,6 +5,7 @@ import (
 	"testing"
 
 	"github.com/agglayer/go_signer/log"
+	"github.com/agglayer/go_signer/signer/opsigneradapter"
 	signertypes "github.com/agglayer/go_signer/signer/types"
 	"github.com/stretchr/testify/require"
 )
@@ -95,6 +96,16 @@ func TestNewSigner(t *testing.T) {
 				Config: map[string]interface{}{
 					FieldAddress: "0x71C7656EC7ab88b098defB751B7401B5f6d8976F",
 					FieldURL:     "http://localhost:9001",
+				},
+			},
+			expectedError: false,
+		},
+		{
+			name: "AWS config",
+			config: signertypes.SignerConfig{
+				Method: signertypes.MethodAWSKMS,
+				Config: map[string]interface{}{
+					opsigneradapter.FieldKeyName: "path-to-key",
 				},
 			},
 			expectedError: false,
