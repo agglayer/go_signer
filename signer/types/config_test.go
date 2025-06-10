@@ -86,7 +86,7 @@ func TestSignerConfigString(t *testing.T) {
 			"Password": "test",
 		},
 	}
-	expected := "Method: local\n Config[Password]: test\n Config[Path]: /app/sequencer.keystore\n"
+	expected := "SignerConfig:Method: local\n Config[Password]: test\n Config[Path]: /app/sequencer.keystore\n"
 	require.Equal(t, expected, cfg.String())
 
 	cfg = SignerConfig{
@@ -96,6 +96,14 @@ func TestSignerConfigString(t *testing.T) {
 			"Address": "0x1234567890abcdef",
 		},
 	}
-	expected = "Method: remote\n Config[Address]: 0x1234567890abcdef\n Config[URL]: http://localhost:8545\n"
+	expected = "SignerConfig:Method: remote\n Config[Address]: 0x1234567890abcdef\n Config[URL]: http://localhost:8545\n"
 	require.Equal(t, expected, cfg.String())
+
+	require.Equal(t, "SignerConfig:Method: \n", SignerConfig{}.String())
+	require.Equal(t, "SignerConfig:Method: test\n Config[key]: value\nConfig[key2]: 4\n", SignerConfig{
+		Method: "test",
+		Config: map[string]any{"key": "value",
+			"key2": 4},
+	}.String())
+
 }

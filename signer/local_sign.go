@@ -90,12 +90,14 @@ func NewLocalSign(name string, logger signercommon.Logger,
 // NewLocalSignFromPrivateKey creates a new LocalSign based on a private key
 func NewLocalSignFromPrivateKey(name string,
 	logger signercommon.Logger,
-	privateKey *ecdsa.PrivateKey) *LocalSign {
+	privateKey *ecdsa.PrivateKey,
+	chainID uint64) *LocalSign {
 	return &LocalSign{
 		name:          name,
 		logger:        logger,
 		privateKey:    privateKey,
 		publicAddress: crypto.PubkeyToAddress(privateKey.PublicKey),
+		chainID:       chainID,
 	}
 }
 

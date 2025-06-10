@@ -14,6 +14,8 @@ var (
 	MethodRemoteSigner SignMethod = "remote"
 	MethodGCPKMS       SignMethod = "GCP"
 	MethodAWSKMS       SignMethod = "AWS"
+	// Methods for debug / unittest
+	MethodMock SignMethod = "mock" //
 )
 
 func (m SignMethod) String() string {
@@ -38,19 +40,19 @@ func (c SignerConfig) Get(key string) (string, error) {
 	if !ok {
 		v, ok = c.Config[strings.ToLower(key)]
 		if !ok {
-			return "", fmt.Errorf("key %s not found", key)
+			return "", fmt.Errorf("key %s not found. Err: %w", key, ErrMissingConfigParam)
 		}
 	}
 	s, ok := v.(string)
 	if !ok {
-		return "", fmt.Errorf("key %s is not a string", key)
+		return "", fmt.Errorf("key %s is not a string. Err: %w", key, ErrBadConfigParams)
 	}
 	return s, nil
 }
 
 func (c SignerConfig) String() string {
 	var sb strings.Builder
-	sb.WriteString(fmt.Sprintf("Method: %s\n", c.Method))
+	sb.WriteString(fmt.Sprintf("SignerConfig:Method: %s\n", c.Method))
 	keys := make([]string, 0, len(c.Config))
 	for k := range c.Config {
 		keys = append(keys, k)
@@ -59,5 +61,6 @@ func (c SignerConfig) String() string {
 	for _, k := range keys {
 		sb.WriteString(fmt.Sprintf(" Config[%s]: %v\n", k, c.Config[k]))
 	}
+
 	return sb.String()
 }

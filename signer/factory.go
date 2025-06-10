@@ -48,6 +48,12 @@ func NewSigner(ctx context.Context, chainID uint64, cfg types.SignerConfig, name
 		if err != nil {
 			return nil, err
 		}
+	case types.MethodMock:
+		res, err = NewMockSign(name, logger, cfg, chainID)
+		if err != nil {
+			return nil, err
+		}
+
 	default:
 		return nil, fmt.Errorf("unknown signer method %s", cfg.Method)
 	}
