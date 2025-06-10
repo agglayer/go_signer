@@ -91,7 +91,8 @@ func NewMockConfig(cfg signertypes.SignerConfig) (MockSignConfigure, error) {
 	if privateKeyStr != "" {
 		err := res.LoadPrivateKey(privateKeyStr)
 		if err != nil {
-			return res, fmt.Errorf("config %s: field %s is not a valid private key. Err: %w", cfg.Method, FieldMockPrivateKey, err)
+			return res, fmt.Errorf("config %s: field %s is not a valid private key. Err: %w",
+				cfg.Method, FieldMockPrivateKey, err)
 		}
 		res.mode = MockSignModePrivateKey
 	}
@@ -130,8 +131,6 @@ func (c *MockSignConfigure) LoadPrivateKey(hexKey string) error {
 	if err != nil {
 		return fmt.Errorf("failed to parse private key: %w", err)
 	}
-	//publicAddress := crypto.PubkeyToAddress(c.privateKey.PublicKey)
-	//c.publicAddress = &publicAddress
 	return nil
 }
 

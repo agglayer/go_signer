@@ -25,7 +25,7 @@ func createAWSSigner(t *testing.T, ctx context.Context, chainID uint64) (signert
 }
 
 func TestAWSSigner(t *testing.T) {
-	//t.Skip("It's not working yet")
+	t.Skip("It require AWS credentials and a KMS key to run this test.")
 	testGenericSignerE2E(t, e2eTestParams{
 		createSignerFunc: createAWSSigner,
 		canSign:          true,

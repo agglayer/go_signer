@@ -26,7 +26,6 @@ func TestGenereteSpecificCfgSetPrivateAndPublicThatMatch(t *testing.T) {
 	genericCfg := NewMockSignerConfig(privateKey, publicKey)
 	_, err := NewMockConfig(genericCfg)
 	require.NoError(t, err)
-
 }
 
 func TestGenereteSpecificCfgSetPrivateAndPublicThatMissmatch(t *testing.T) {

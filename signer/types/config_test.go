@@ -100,10 +100,9 @@ func TestSignerConfigString(t *testing.T) {
 	require.Equal(t, expected, cfg.String())
 
 	require.Equal(t, "SignerConfig:Method: \n", SignerConfig{}.String())
-	require.Equal(t, "SignerConfig:Method: test\n Config[key]: value\nConfig[key2]: 4\n", SignerConfig{
+	require.Equal(t, "SignerConfig:Method: test\n Config[key]: value\n Config[key2]: 4\n", SignerConfig{
 		Method: "test",
 		Config: map[string]any{"key": "value",
 			"key2": 4},
 	}.String())
-
 }

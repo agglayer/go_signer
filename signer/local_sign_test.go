@@ -52,7 +52,7 @@ func TestNewLocalSignFromPrivateKey(t *testing.T) {
 	privateKey, err := crypto.GenerateKey()
 	require.NoError(t, err)
 	logger := log.WithFields("test", "test")
-	sut := NewLocalSignFromPrivateKey("name", logger, privateKey)
+	sut := NewLocalSignFromPrivateKey("name", logger, privateKey, 0)
 	require.NotNil(t, sut)
 	ctx := context.TODO()
 	err = sut.Initialize(ctx)
