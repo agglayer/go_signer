@@ -16,11 +16,11 @@ import (
 // basically it's a wrapper over LocalSign that, instead of getting the private key from
 // a keystore file, it uses a private key that is set in the configuration.
 type MockSign struct {
-	name           string
-	logger         signercommon.Logger
-	cfg            MockSignConfigure
-	fakePublicAddr *common.Address // This is used to fake the public address when using MockSignModePublicKey
-	localSign      *LocalSign
+	name   string
+	logger signercommon.Logger
+	cfg    MockSignConfigure
+	// localSign is the actual signer that uses the private key
+	localSign *LocalSign
 }
 
 func NewMockSign(name string, logger signercommon.Logger,
@@ -38,11 +38,10 @@ func NewMockSign(name string, logger signercommon.Logger,
 			return nil, fmt.Errorf("failed to generate private key: %w", err)
 		}
 	case MockSignModePrivateKey:
-		privateKey := cfg.privateKey
+		privateKey = cfg.privateKey
 		if privateKey == nil {
 			return nil, fmt.Errorf("private key is nil, cannot create MockSign with mode %s", cfg.mode.String())
 		}
-
 	}
 
 	return &MockSign{
@@ -54,7 +53,8 @@ func NewMockSign(name string, logger signercommon.Logger,
 }
 
 func (e *MockSign) String() string {
-	return fmt.Sprintf("MockSign{name:%s, mode:%s}", e.name, e.cfg.mode.String())
+	return fmt.Sprintf("MockSign{name:%s, mode:%s, initialized: %t}", e.name, e.cfg.mode.String(),
+		e.localSign.IsInitialized())
 }
 func (e *MockSign) Initialize(ctx context.Context) error {
 	e.logger.Warnf("%s is not suitable for production!", e.String())
@@ -64,6 +64,7 @@ func (e *MockSign) Initialize(ctx context.Context) error {
 
 // SignHash signs a hash
 func (e *MockSign) SignHash(ctx context.Context, hash common.Hash) ([]byte, error) {
+	e.logger.Warnf("SignHash: %s is not suitable for production!", e.String())
 	return e.localSign.SignHash(ctx, hash)
 }
 
@@ -72,16 +73,9 @@ func (e *MockSign) Verify(hash common.Hash, signature []byte) error {
 }
 
 func (e *MockSign) PublicAddress() common.Address {
-	if e.cfg.forcedPublicAddress != nil {
-		real := e.localSign.PublicAddress()
-		if *e.cfg.forcedPublicAddress != real {
-			e.logger.Warnf("MockSign PublicAddress is forced to %s instead of real one: %s", e.cfg.forcedPublicAddress.Hex(),
-				real.Hex())
-		}
-		return *e.cfg.forcedPublicAddress
-	}
 	return e.localSign.PublicAddress()
 }
 func (e *MockSign) SignTx(ctx context.Context, tx *goethereumtypes.Transaction) (*goethereumtypes.Transaction, error) {
+	e.logger.Warnf("SignTx: %s is not suitable for production!", e.String())
 	return e.localSign.SignTx(ctx, tx)
 }

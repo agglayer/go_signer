@@ -71,7 +71,7 @@ func TestUnmarshalConfig(t *testing.T) {
 	}{}
 	viper.SetConfigType("toml")
 	{
-		
+
 	}
 	err := viper.ReadConfig(bytes.NewBuffer([]byte(configRemoteSigner)))
 	require.NoError(t, err)
@@ -131,5 +131,9 @@ func TestSignerConfigString(t *testing.T) {
 		Method: "test",
 		Config: map[string]any{"key": "value",
 			"key2": 4},
+	}.String())
+	require.Equal(t, "SignerConfig:Method: test-nil\n", SignerConfig{
+		Method: "test-nil",
+		Config: nil,
 	}.String())
 }

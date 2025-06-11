@@ -13,7 +13,7 @@ func createMockSigner(t *testing.T, ctx context.Context, chainID uint64) (signer
 	t.Helper()
 	return signer.NewMockSign("test-mock-signer",
 		log.WithFields("module", "test"),
-		signer.NewMockSignerConfig("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80", ""),
+		signer.NewMockSignerConfig("0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"),
 		chainID)
 }
 

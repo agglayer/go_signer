@@ -1,12 +1,15 @@
 package signer
 
 import (
+	"bytes"
 	"context"
 	"testing"
 
 	"github.com/agglayer/go_signer/log"
 	"github.com/agglayer/go_signer/signer/opsigneradapter"
 	signertypes "github.com/agglayer/go_signer/signer/types"
+	"github.com/mitchellh/mapstructure"
+	"github.com/spf13/viper"
 	"github.com/stretchr/testify/require"
 )
 
@@ -126,5 +129,75 @@ func TestNewSigner(t *testing.T) {
 				require.NotNil(t, sut)
 			}
 		})
+	}
+}
+
+func TestNewSignerFromConfigFile(t *testing.T) {
+	testcases := []struct {
+		name                 string
+		configFileContent    []string
+		expectedConfigString string
+		expectedSignerString string
+	}{
+		{
+			name: "local signer",
+			configFileContent: []string{`
+			[Signer]
+			Method = "local"
+			Path = "/path/to/keystore"
+			Password = "password"
+		`,
+				`Signer={ Method="local", Path="/path/to/keystore", Password="password"}`,
+			},
+			expectedConfigString: "SignerConfig:Method: local\n Config[password]: password\n Config[path]: /path/to/keystore\n",
+			expectedSignerString: "signer: local[local signer]:  initialized:false path:{/path/to/keystore password}, pubAddr: ???",
+		},
+		{
+			name: "mock random",
+			configFileContent: []string{`
+			[Signer]
+			Method = "mock"
+			`,
+				`Signer={ Method="mock"}`,
+			},
+			expectedConfigString: "SignerConfig:Method: mock\n",
+			expectedSignerString: "MockSign{name:mock random, mode:Random, initialized: false}",
+		},
+		{
+			name: "mock privateKey",
+			configFileContent: []string{`
+			[Signer]
+			Method = "mock"
+			PrivateKey = "0xa574853f4757bfdcbb59b03635324463750b27e16df897f3d00dc6bef2997ae0"
+			`,
+				`Signer={ Method="mock", PrivateKey="0xa574853f4757bfdcbb59b03635324463750b27e16df897f3d00dc6bef2997ae0"}`,
+			},
+			expectedConfigString: "SignerConfig:Method: mock\n Config[privatekey]: 0xa574853f4757bfdcbb59b03635324463750b27e16df897f3d00dc6bef2997ae0\n",
+			expectedSignerString: "MockSign{name:mock privateKey, mode:PrivateKey, initialized: false}",
+		},
+	}
+
+	for _, tc := range testcases {
+		for _, content := range tc.configFileContent {
+			t.Run(tc.name, func(t *testing.T) {
+				cfg := struct {
+					Signer signertypes.SignerConfig `jsonschema:"omitempty" mapstructure:"Signer"`
+				}{}
+				viper.SetConfigType("toml")
+				err := viper.ReadConfig(bytes.NewBuffer([]byte(content)))
+				require.NoError(t, err)
+				decodeHooks := []viper.DecoderConfigOption{
+					viper.DecodeHook(mapstructure.ComposeDecodeHookFunc(
+						mapstructure.TextUnmarshallerHookFunc(), mapstructure.StringToSliceHookFunc(","))),
+				}
+				err = viper.Unmarshal(&cfg, decodeHooks...)
+				require.NoError(t, err)
+				require.Equal(t, tc.expectedConfigString, cfg.Signer.String())
+				ctx := context.TODO()
+				sut, err := NewSigner(ctx, 1, cfg.Signer, tc.name, log.WithFields("test", "test"))
+				require.NoError(t, err)
+				require.Equal(t, tc.expectedSignerString, sut.String())
+			})
+		}
 	}
 }

@@ -129,6 +129,10 @@ func (e *LocalSign) initializeKey() error {
 	return nil
 }
 
+func (e *LocalSign) IsInitialized() bool {
+	return e.privateKey != nil && e.auth != nil
+}
+
 func (e *LocalSign) initializeAuth() error {
 	if e.auth != nil {
 		return nil
@@ -176,7 +180,16 @@ func (e *LocalSign) PublicAddress() common.Address {
 }
 
 func (e *LocalSign) String() string {
-	return fmt.Sprintf("%s path:%s, pubAddr: %s", e.logPrefix(), e.file, e.publicAddress.String())
+	if e == nil {
+		return "LocalSign{nil}"
+	}
+	if e.IsInitialized() {
+		return fmt.Sprintf("%s initialized:%t path:%s, pubAddr: %s",
+			e.logPrefix(), e.IsInitialized(), e.file, e.publicAddress.String())
+	} else {
+		return fmt.Sprintf("%s initialized:%t path:%s, pubAddr: ???",
+			e.logPrefix(), e.IsInitialized(), e.file)
+	}
 }
 
 func (e *LocalSign) logPrefix() string {

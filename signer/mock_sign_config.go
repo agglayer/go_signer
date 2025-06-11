@@ -7,13 +7,11 @@ import (
 	"fmt"
 
 	signertypes "github.com/agglayer/go_signer/signer/types"
-	"github.com/ethereum/go-ethereum/common"
 	"github.com/ethereum/go-ethereum/crypto"
 )
 
 const (
-	FieldMockPrivateKey      = "privatekey"
-	FieldMockForcedPublicKey = "forcedpublickey"
+	FieldMockPrivateKey = "privatekey"
 )
 
 type MockSignMode int
@@ -31,9 +29,8 @@ func (s MockSignMode) String() string {
 }
 
 type MockSignConfigure struct {
-	privateKey          *ecdsa.PrivateKey
-	forcedPublicAddress *common.Address
-	mode                MockSignMode
+	privateKey *ecdsa.PrivateKey
+	mode       MockSignMode
 }
 
 func (c *MockSignConfigure) String() string {
@@ -44,23 +41,17 @@ func (c *MockSignConfigure) String() string {
 	if c.privateKey != nil {
 		res += ", privateKey: SET (public:" + crypto.PubkeyToAddress(c.privateKey.PublicKey).Hex() + ")"
 	}
-	if c.forcedPublicAddress != nil {
-		res += fmt.Sprintf(", forcedPublicAddress: %s", c.forcedPublicAddress.Hex())
-	}
 	return res + "}"
 }
 
 // NewMockSignerConfig creates a new mock signer configuration (the general one that is on configfiles)
-func NewMockSignerConfig(privateKey, publicKey string) signertypes.SignerConfig {
+func NewMockSignerConfig(privateKey string) signertypes.SignerConfig {
 	res := signertypes.SignerConfig{
 		Method: signertypes.MethodMock,
 		Config: map[string]interface{}{},
 	}
 	if privateKey != "" {
 		res.Config[FieldMockPrivateKey] = privateKey
-	}
-	if publicKey != "" {
-		res.Config[FieldMockForcedPublicKey] = publicKey
 	}
 	return res
 }
@@ -80,12 +71,6 @@ func NewMockConfig(cfg signertypes.SignerConfig) (MockSignConfigure, error) {
 			cfg.Method, FieldMockPrivateKey, err)
 	}
 
-	publicKeyStr, err := cfg.Get(FieldMockForcedPublicKey)
-	if err != nil && !errors.Is(err, signertypes.ErrMissingConfigParam) {
-		return res, fmt.Errorf("config %s: error in field %s . Err: %w",
-			cfg.Method, FieldMockForcedPublicKey, err)
-	}
-
 	if privateKeyStr != "" {
 		err := res.LoadPrivateKey(privateKeyStr)
 		if err != nil {
@@ -93,13 +78,6 @@ func NewMockConfig(cfg signertypes.SignerConfig) (MockSignConfigure, error) {
 				cfg.Method, FieldMockPrivateKey, err)
 		}
 		res.mode = MockSignModePrivateKey
-	}
-
-	if publicKeyStr != "" {
-		err := res.SetPublicKey(publicKeyStr)
-		if err != nil {
-			return res, fmt.Errorf("config %s: field %s is not a valid public key: %w", cfg.Method, FieldMockForcedPublicKey, err)
-		}
 	}
 	return res, nil
 }
@@ -126,19 +104,5 @@ func (c *MockSignConfigure) LoadPrivateKey(hexKey string) error {
 	if err != nil {
 		return fmt.Errorf("failed to parse private key: %w", err)
 	}
-	return nil
-}
-
-func (c *MockSignConfigure) SetPublicKey(hexKey string) error {
-	hexKey = remove0xPrefix(hexKey) // Remove '0x' prefix if present
-	key, err := hex.DecodeString(hexKey)
-	if err != nil {
-		return fmt.Errorf("failed to decode public key hex: %w", err)
-	}
-	if len(key) != common.AddressLength {
-		return fmt.Errorf("invalid public key length: expected %d bytes, got %d", common.AddressLength, len(key))
-	}
-	pubKey := common.BytesToAddress(key)
-	c.forcedPublicAddress = &pubKey
 	return nil
 }
