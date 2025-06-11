@@ -1,6 +1,7 @@
 package signer
 
 import (
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -18,18 +19,24 @@ func TestGenereteSpecificOnlyPrivateKey(t *testing.T) {
 	require.NoError(t, err, "should not return error when creating specific config from generic config")
 	require.NotNil(t, specificCfg, "specific config should not be nil")
 	require.NotNil(t, specificCfg.privateKey, "specific config private key should not be nil")
-	require.Nil(t, specificCfg.publicAddress)
-	require.Equal(t, "MockSignConfigure{mode: PrivateKey, privateKey: SET}", specificCfg.String())
+	require.Nil(t, specificCfg.forcedPublicAddress)
+	require.Equal(t, "MockSignConfigure{mode: PrivateKey, privateKey: SET (public:0xc653eCD4AC5153a3700Fb13442Bcf00A691cca16)}", specificCfg.String())
 }
 
 func TestGenereteSpecificCfgSetPrivateAndPublicThatMatch(t *testing.T) {
 	genericCfg := NewMockSignerConfig(privateKey, publicKey)
-	_, err := NewMockConfig(genericCfg)
+	specificCfg, err := NewMockConfig(genericCfg)
 	require.NoError(t, err)
+	require.Equal(t, "MockSignConfigure{mode: PrivateKey, privateKey: SET (public:0xc653eCD4AC5153a3700Fb13442Bcf00A691cca16), forcedPublicAddress: 0xc653eCD4AC5153a3700Fb13442Bcf00A691cca16}", specificCfg.String())
+	require.NotNil(t, specificCfg.privateKey, "specific config private key should not be nil")
+	require.NotNil(t, specificCfg.forcedPublicAddress, "specific config forced public address should not be nil")
+	require.Equal(t, publicKey, specificCfg.forcedPublicAddress.Hex(), "forced public address should match the one in the generic config")
 }
 
-func TestGenereteSpecificCfgSetPrivateAndPublicThatMissmatch(t *testing.T) {
+func TestGenereteSpecificCfgSetPrivateAndSetForcePublicKey(t *testing.T) {
 	genericCfg := NewMockSignerConfig(privateKey, publicKey2)
-	_, err := NewMockConfig(genericCfg)
-	require.Error(t, err)
+	specificCfg, err := NewMockConfig(genericCfg)
+	require.NoError(t, err)
+	require.NotNil(t, specificCfg.forcedPublicAddress, "specific config forced public address should not be nil")
+	require.Equal(t, publicKey2, strings.ToLower(specificCfg.forcedPublicAddress.Hex()), "forced public address should match the one in the generic config")
 }

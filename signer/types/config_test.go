@@ -16,7 +16,12 @@ const (
 	configRemoteSigner = `
 	Signer = {Method = "remote", URL = "http://localhost:8545", Address = "0x1234567890abcdef"}
 	`
-
+	configMockPrivateKye = `
+	{
+     Method: "mock",
+     PrivateKey: "0xa574853f4757bfdcbb59b03635324463750b27e16df897f3d00dc6bef2997ae0",
+}
+	 `
 	configEmpty = `
 	Signer = {}
 	`
@@ -46,6 +51,28 @@ func TestUnmarshalRemoteSignerConfig(t *testing.T) {
 		Signer SignerConfig `jsonschema:"omitempty" mapstructure:"Signer"`
 	}{}
 	viper.SetConfigType("toml")
+	err := viper.ReadConfig(bytes.NewBuffer([]byte(configRemoteSigner)))
+	require.NoError(t, err)
+	decodeHooks := []viper.DecoderConfigOption{
+		// this allows arrays to be decoded from env var separated by ",", example: MY_VAR="value1,value2,value3"
+		viper.DecodeHook(mapstructure.ComposeDecodeHookFunc(
+			mapstructure.TextUnmarshallerHookFunc(), mapstructure.StringToSliceHookFunc(","))),
+	}
+	err = viper.Unmarshal(&cfg, decodeHooks...)
+	require.NoError(t, err)
+	require.Equal(t, MethodRemoteSigner, cfg.Signer.Method)
+	require.Equal(t, "http://localhost:8545", cfg.Signer.Config["url"])
+	require.Equal(t, "0x1234567890abcdef", cfg.Signer.Config["address"])
+}
+
+func TestUnmarshalConfig(t *testing.T) {
+	cfg := struct {
+		Signer SignerConfig `jsonschema:"omitempty" mapstructure:"Signer"`
+	}{}
+	viper.SetConfigType("toml")
+	{
+		
+	}
 	err := viper.ReadConfig(bytes.NewBuffer([]byte(configRemoteSigner)))
 	require.NoError(t, err)
 	decodeHooks := []viper.DecoderConfigOption{
