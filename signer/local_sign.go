@@ -90,12 +90,14 @@ func NewLocalSign(name string, logger signercommon.Logger,
 // NewLocalSignFromPrivateKey creates a new LocalSign based on a private key
 func NewLocalSignFromPrivateKey(name string,
 	logger signercommon.Logger,
-	privateKey *ecdsa.PrivateKey) *LocalSign {
+	privateKey *ecdsa.PrivateKey,
+	chainID uint64) *LocalSign {
 	return &LocalSign{
 		name:          name,
 		logger:        logger,
 		privateKey:    privateKey,
 		publicAddress: crypto.PubkeyToAddress(privateKey.PublicKey),
+		chainID:       chainID,
 	}
 }
 
@@ -125,6 +127,10 @@ func (e *LocalSign) initializeKey() error {
 	e.privateKey = privateKey
 	e.publicAddress = crypto.PubkeyToAddress(privateKey.PublicKey)
 	return nil
+}
+
+func (e *LocalSign) IsInitialized() bool {
+	return e.privateKey != nil && e.auth != nil
 }
 
 func (e *LocalSign) initializeAuth() error {
@@ -174,7 +180,16 @@ func (e *LocalSign) PublicAddress() common.Address {
 }
 
 func (e *LocalSign) String() string {
-	return fmt.Sprintf("%s path:%s, pubAddr: %s", e.logPrefix(), e.file, e.publicAddress.String())
+	if e == nil {
+		return "LocalSign{nil}"
+	}
+	if e.IsInitialized() {
+		return fmt.Sprintf("%s initialized:%t path:%s, pubAddr: %s",
+			e.logPrefix(), e.IsInitialized(), e.file, e.publicAddress.String())
+	} else {
+		return fmt.Sprintf("%s initialized:%t path:%s, pubAddr: ???",
+			e.logPrefix(), e.IsInitialized(), e.file)
+	}
 }
 
 func (e *LocalSign) logPrefix() string {

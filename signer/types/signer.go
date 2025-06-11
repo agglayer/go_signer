@@ -9,7 +9,10 @@ import (
 )
 
 var (
-	ErrNotImplemented = fmt.Errorf("not implemented")
+	ErrNotImplemented       = fmt.Errorf("not implemented")
+	ErrMissingConfigParam   = fmt.Errorf("missing config parameter")
+	ErrBadConfigParams      = fmt.Errorf("bad config parameters")
+	ErrNotImplementedMethod = fmt.Errorf("not implemented method")
 )
 
 type Signer interface {
