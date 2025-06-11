@@ -175,6 +175,18 @@ func TestNewSignerFromConfigFile(t *testing.T) {
 			expectedConfigString: "SignerConfig:Method: mock\n Config[privatekey]: 0xa574853f4757bfdcbb59b03635324463750b27e16df897f3d00dc6bef2997ae0\n",
 			expectedSignerString: "MockSign{name:mock privateKey, mode:PrivateKey, initialized: false}",
 		},
+		{
+			name: "AWS",
+			configFileContent: []string{`
+			[Signer]
+			Method = "AWS"
+			KeyName = "a47c263b-6575-4835-8721-af0bbb97XXXX"
+			`,
+				`Signer={ Method="AWS", KeyName="a47c263b-6575-4835-8721-af0bbb97XXXX"}`,
+			},
+			expectedConfigString: "SignerConfig:Method: AWS\n Config[keyname]: a47c263b-6575-4835-8721-af0bbb97XXXX\n",
+			expectedSignerString: "signerAdapter: op_signer_adapter AWS/a47c263b-6575-4835-8721-af0bbb97XXXX",
+		},
 	}
 
 	for _, tc := range testcases {

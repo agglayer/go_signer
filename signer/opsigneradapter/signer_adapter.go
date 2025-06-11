@@ -18,23 +18,26 @@ const (
 )
 
 type SignerAdapter struct {
-	opSigner opsignerprovider.SignatureProvider
-	ctx      context.Context
-	logger   signercommon.Logger
-	keyName  string
-	chainID  uint64
+	opSigner       opsignerprovider.SignatureProvider
+	opTypeProvider opsignerprovider.ProviderType
+	ctx            context.Context
+	logger         signercommon.Logger
+	keyName        string
+	chainID        uint64
 }
 
 var _ gosignertypes.Signer = (*SignerAdapter)(nil)
 
 func NewSignerAdapter(ctx context.Context, logger signercommon.Logger, opSigner opsignerprovider.SignatureProvider,
+	opTypeProvider opsignerprovider.ProviderType,
 	keyName string, chainID uint64) *SignerAdapter {
 	return &SignerAdapter{
-		opSigner: opSigner,
-		ctx:      ctx,
-		logger:   logger,
-		keyName:  keyName,
-		chainID:  chainID,
+		opSigner:       opSigner,
+		opTypeProvider: opTypeProvider,
+		ctx:            ctx,
+		logger:         logger,
+		keyName:        keyName,
+		chainID:        chainID,
 	}
 }
 
@@ -51,7 +54,7 @@ func NewSignerAdapterFromConfig(ctx context.Context, logger signercommon.Logger,
 	if err != nil {
 		return nil, fmt.Errorf("error getting keyName from config. Err: %w", err)
 	}
-	return NewSignerAdapter(ctx, logger, opSigner, keyName, chainID), nil
+	return NewSignerAdapter(ctx, logger, opSigner, opConfig.ProviderType, keyName, chainID), nil
 }
 
 func (s *SignerAdapter) Initialize(context.Context) error {
@@ -76,7 +79,7 @@ func convertPublicKeyToAddress(publicKey []byte) common.Address {
 }
 
 func (s *SignerAdapter) String() string {
-	return "op_signer_adapter"
+	return "signerAdapter: op_signer_adapter " + string(s.opTypeProvider) + "/" + s.keyName
 }
 
 func (s *SignerAdapter) SignHash(ctx context.Context, hash common.Hash) ([]byte, error) {
